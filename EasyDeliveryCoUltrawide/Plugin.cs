@@ -65,6 +65,8 @@ namespace EasyDeliveryCoUltrawide
             PatchByName(harmony, "PauseSystem", "SetResolution", postfix: nameof(PauseSystem_SetResolution_Postfix));
             PatchByName(harmony, "PauseSystem", "SetFullscreen", postfix: nameof(PauseSystem_SetFullscreen_Postfix));
             PatchByName(harmony, "PauseSystem", "UpdateFOV", prefix: nameof(PauseSystem_UpdateFOV_Prefix));
+            PatchByName(harmony, "IntroDotExe", "Setup", postfix: nameof(IntroDotExe_Setup_Postfix));
+            PatchByName(harmony, "ChooseExe", "Setup", postfix: nameof(ChooseExe_Setup_Postfix));
             PatchByName(harmony, "MiniRenderer", "Start", prefix: nameof(MiniRenderer_Start_Prefix));
             PatchByName(harmony, "MiniRenderer", "Start", postfix: nameof(MiniRenderer_Start_Postfix));
             PatchByName(harmony, "pixelPerfectView", "AdjustViewPlane", prefix: nameof(PixelPerfectView_AdjustViewPlane_Prefix));
@@ -340,6 +342,76 @@ namespace EasyDeliveryCoUltrawide
             LogDebug($"Resized viewport to full screen for {camera.name} ({camera.GetInstanceID()}).");
         }
 
+        private static void ApplyCameraAspect(Camera camera)
+        {
+            if (camera == null)
+            {
+                return;
+            }
+
+            if (!ShouldApply() || !IsUltrawide())
+            {
+                return;
+            }
+
+            if (!IsPrimaryGameplayCamera(camera))
+            {
+                return;
+            }
+
+            float targetAspect = GetTargetAspect();
+            if (targetAspect <= 0.01f)
+            {
+                return;
+            }
+
+            if (Mathf.Abs(camera.aspect - targetAspect) < 0.0001f)
+            {
+                return;
+            }
+
+            camera.aspect = targetAspect;
+            LogDebug($"Forced aspect for {camera.name} ({camera.GetInstanceID()}) to {targetAspect:0.###}.");
+        }
+
+        private static void ApplyMenuCameraAspect(Camera camera)
+        {
+            if (camera == null)
+            {
+                return;
+            }
+
+            if (!ShouldApply() || !IsUltrawide())
+            {
+                return;
+            }
+
+            float targetAspect = GetTargetAspect();
+            if (targetAspect <= 0.01f)
+            {
+                return;
+            }
+
+            if (Mathf.Abs(camera.aspect - targetAspect) < 0.0001f)
+            {
+                return;
+            }
+
+            camera.aspect = targetAspect;
+            LogDebug($"Forced menu aspect for {camera.name} ({camera.GetInstanceID()}) to {targetAspect:0.###}.");
+        }
+
+        private static void ApplyMenuCameraAspect(GameObject menuCameraObject)
+        {
+            if (menuCameraObject == null)
+            {
+                return;
+            }
+
+            var cam = menuCameraObject.GetComponentInChildren<Camera>(true);
+            ApplyMenuCameraAspect(cam);
+        }
+
         private static void ApplyAllCameras()
         {
             if (!ShouldApply())
@@ -354,6 +426,7 @@ namespace EasyDeliveryCoUltrawide
 
             foreach (var camera in Camera.allCameras)
             {
+                ApplyCameraAspect(camera);
                 ApplyCameraViewport(camera);
             }
         }
@@ -367,6 +440,11 @@ namespace EasyDeliveryCoUltrawide
             }
 
             if (!ShouldApply() || !HasFovOverride())
+            {
+                return;
+            }
+
+            if (!IsPrimaryGameplayCamera(camera))
             {
                 return;
             }
@@ -468,6 +546,7 @@ namespace EasyDeliveryCoUltrawide
                 }
 
                 var camera = go.GetComponentInChildren<Camera>();
+                ApplyCameraAspect(camera);
                 ApplyCameraViewport(camera);
                 ApplyCameraFov(camera);
             }
@@ -517,6 +596,7 @@ namespace EasyDeliveryCoUltrawide
             {
                 var mainCameraField = AccessTools.Field(__instance.GetType(), "mainCamera");
                 var mainCamera = mainCameraField != null ? mainCameraField.GetValue(__instance) as Camera : null;
+                ApplyCameraAspect(mainCamera);
                 ApplyCameraFov(mainCamera);
             }
 
@@ -560,6 +640,7 @@ namespace EasyDeliveryCoUltrawide
             ApplyPauseSystemFov(targetFov);
 
             ApplyAllCameraFov();
+            ScaleOverlayBackdrops();
             return false;
         }
 
@@ -735,6 +816,30 @@ namespace EasyDeliveryCoUltrawide
             }
             ScaleBackdropFromField(__instance, "backdrop", menuCamera, "ScreenSystem");
             ScaleOverlaySprites(owner, menuCamera, "ScreenSystem");
+        }
+
+        private static void IntroDotExe_Setup_Postfix(object __instance)
+        {
+            if (!ShouldApply() || __instance == null)
+            {
+                return;
+            }
+
+            var field = AccessTools.Field(__instance.GetType(), "menuCamera");
+            var menuCamera = field != null ? field.GetValue(__instance) as GameObject : null;
+            ApplyMenuCameraAspect(menuCamera);
+        }
+
+        private static void ChooseExe_Setup_Postfix(object __instance)
+        {
+            if (!ShouldApply() || __instance == null)
+            {
+                return;
+            }
+
+            var field = AccessTools.Field(__instance.GetType(), "menuCamera");
+            var menuCamera = field != null ? field.GetValue(__instance) as GameObject : null;
+            ApplyMenuCameraAspect(menuCamera);
         }
 
         private static void MenuScreenTransition_Update_Postfix(object __instance)
@@ -1020,6 +1125,7 @@ namespace EasyDeliveryCoUltrawide
             _pixelViewSkipAspects[id] = sourceAspect;
             LogDebug($"Skipped pixelPerfectView resize on {component.name} (source aspect {sourceAspect:0.###}).");
         }
+
 
 
         private static void LogFovOverride(Camera camera, float fov)
