@@ -12,23 +12,24 @@ $pluginName = "EasyDeliveryCoUltrawide"
 $distRoot = Join-Path $repoRoot "Thunderstore"
 $distPlugins = Join-Path $distRoot "BepInEx\plugins\$pluginName"
 $zipRoot = Join-Path $repoRoot "dist"
+$manifestPath = Join-Path $repoRoot "manifest.json"
+$changelogPath = Join-Path $repoRoot "CHANGELOG.md"
+$iconPath = Join-Path $repoRoot "assets\icon.png"
 
 if (-not (Test-Path $distRoot))
 {
-    throw "Thunderstore folder not found at $distRoot"
+    New-Item -ItemType Directory -Force -Path $distRoot | Out-Null
 }
 
 Write-Host "Building $Project ($Configuration)..."
 dotnet build (Join-Path $repoRoot $Project) -c $Configuration
 
 Write-Host "Updating manifest version..."
-$manifestPath = Join-Path $distRoot "manifest.json"
 $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
 $manifest.version_number = $Version
 $manifest | ConvertTo-Json -Depth 10 | Set-Content -Path $manifestPath
 
 Write-Host "Updating changelog version header..."
-$changelogPath = Join-Path $distRoot "CHANGELOG.md"
 $changelog = Get-Content $changelogPath -Raw
 if ($changelog -notmatch "(?m)^##\s+$Version\s*$")
 {
@@ -54,11 +55,15 @@ if (Test-Path $pdbPath)
 }
 
 Write-Host "Ensuring icon exists..."
-$iconPath = Join-Path $distRoot "icon.png"
 if (-not (Test-Path $iconPath))
 {
     throw "icon.png missing at $iconPath"
 }
+
+Write-Host "Syncing Thunderstore metadata..."
+Copy-Item $manifestPath -Destination (Join-Path $distRoot "manifest.json") -Force
+Copy-Item $changelogPath -Destination (Join-Path $distRoot "CHANGELOG.md") -Force
+Copy-Item $iconPath -Destination (Join-Path $distRoot "icon.png") -Force
 
 Write-Host "Creating zip package..."
 $zipName = "${pluginName}_$Version.zip"

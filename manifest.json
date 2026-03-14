@@ -1,0 +1,9 @@
+{
+    "name":  "EasyDeliveryCoUltrawide",
+    "version_number":  "1.0.2",
+    "website_url":  "https://github.com/shiibe/EasyDeliveryCoUltrawide",
+    "description":  "Ultrawide support for Easy Delivery Co.",
+    "dependencies":  [
+                         "BepInEx-BepInExPack-5.4.2304"
+                     ]
+}
