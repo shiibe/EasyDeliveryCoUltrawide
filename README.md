@@ -9,11 +9,12 @@ Ultrawide camera and UI overlay fixes for Easy Delivery Co.
 - Keeps main UI elements at their intended ratio
 
 ## Screenshots
-![Image](https://github.com/user-attachments/assets/3c0d2f53-17d0-421b-8095-6cbfc6afbb5c)
-![Image](https://github.com/user-attachments/assets/d0fed05d-823d-4c9b-b7d5-180d59cfead9)
-![Image](https://github.com/user-attachments/assets/79a3ee31-b7cb-4058-b6e2-edac25743b98)
-![Image](https://github.com/user-attachments/assets/00496282-9bed-4bf5-ac76-21d452cf0119)
-![Image](https://github.com/user-attachments/assets/0835a069-76cf-4d48-adf4-0c7e02ed4ad1)
+![Image](https://github.com/user-attachments/assets/74a46046-f038-424a-acd6-f011500c42f3)
+![Image](https://github.com/user-attachments/assets/f70c3cc4-60c9-4049-aed4-45fd60015ebf)
+![Image](https://github.com/user-attachments/assets/e79b30dc-b45d-4e84-af9f-bac758e97cce)
+![Image](https://github.com/user-attachments/assets/936045aa-ec3a-4b76-bf15-f09a25003034)
+![Image](https://github.com/user-attachments/assets/e87b4c2a-e66e-431f-b301-9bd7b770daea)
+![Image](https://github.com/user-attachments/assets/52984af7-e949-4c3d-a01b-4caa055d8484)
 
 
 ## Installation
