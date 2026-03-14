@@ -182,6 +182,11 @@ namespace EasyDeliveryCoUltrawide
                 return;
             }
 
+            if (IsPlayerInsideBuilding())
+            {
+                return;
+            }
+
             float savedFov = PlayerPrefs.GetFloat(PrefKeyFov, -1f);
             if (savedFov < 1f)
             {

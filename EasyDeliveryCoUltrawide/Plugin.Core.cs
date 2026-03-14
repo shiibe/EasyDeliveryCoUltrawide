@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using BepInEx.Configuration;
 using BepInEx.Logging;
+using HarmonyLib;
 using UnityEngine;
 
 namespace EasyDeliveryCoUltrawide
@@ -28,6 +30,11 @@ namespace EasyDeliveryCoUltrawide
         private static readonly int MainTexId = Shader.PropertyToID("_MainTex");
         private static readonly int AlphaTexId = Shader.PropertyToID("_AlphaTex");
         private static float _perfLastLogTime;
+
+        private static bool _insideLookupInit;
+        private static Type _ambianceType;
+        private static FieldInfo _ambiancePlayerInsideField;
+        private static UnityEngine.Object _ambianceInstance;
 
         private static bool ShouldApply()
         {
@@ -115,6 +122,11 @@ namespace EasyDeliveryCoUltrawide
 
         internal static void ApplyFovOverride(float fov)
         {
+            if (IsPlayerInsideBuilding())
+            {
+                return;
+            }
+
             var pauseSystem = PauseSystem.pauseSystem;
             if (pauseSystem != null && pauseSystem.mainCamera != null)
             {
@@ -129,6 +141,41 @@ namespace EasyDeliveryCoUltrawide
             if (cam != null)
             {
                 cam.fieldOfView = fov;
+            }
+        }
+
+        private static bool IsPlayerInsideBuilding()
+        {
+            try
+            {
+                if (!_insideLookupInit)
+                {
+                    _insideLookupInit = true;
+                    _ambianceType = AccessTools.TypeByName("sAmbiance");
+                    _ambiancePlayerInsideField = _ambianceType != null ? AccessTools.Field(_ambianceType, "playerInside") : null;
+                }
+
+                if (_ambianceType == null || _ambiancePlayerInsideField == null)
+                {
+                    return false;
+                }
+
+                if (_ambianceInstance == null)
+                {
+                    _ambianceInstance = UnityEngine.Object.FindFirstObjectByType(_ambianceType);
+                }
+
+                if (_ambianceInstance == null)
+                {
+                    return false;
+                }
+
+                var insideGo = _ambiancePlayerInsideField.GetValue(_ambianceInstance) as GameObject;
+                return insideGo != null && insideGo.activeSelf;
+            }
+            catch
+            {
+                return false;
             }
         }
 
