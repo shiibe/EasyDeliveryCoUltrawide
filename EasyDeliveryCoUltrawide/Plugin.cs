@@ -45,7 +45,7 @@ namespace EasyDeliveryCoUltrawide
         {
             _log = Logger;
             _enableMod = Config.Bind("General", "enable_ultrawide_mode", true, "Enable ultrawide fixes.");
-            _aspectRatio = Config.Bind("General", "aspect_ratio", "display", "Aspect ratio override. Examples: display, window, 21:9, 32:9, 2.39.");
+            _aspectRatio = Config.Bind("General", "aspect_ratio", "auto", "Aspect ratio override. Examples: auto (display), window, 21:9, 32:9, 2.39.");
             _debugMode = Config.Bind("General", "debug_logging", false, "Log debug information about applied adjustments.");
             _fovOverride = Config.Bind("Camera", "fov_override", 0f, "Override gameplay camera FOV (40-120). Set to 0 to use in-game setting.");
             _fovCameraPersp = Config.Bind("Camera", "fov_camera_persp", 0f, "Override FOV for camera name 'Camera Persp' (Fixed Camera) (40-120). 0 uses global.");
