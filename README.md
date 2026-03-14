@@ -11,13 +11,13 @@ Ultrawide support via camera and UI overlay fixes for Easy Delivery Co. This mod
 - Keeps main UI elements at their intended ratio
 
 ## Screenshots
-![Image](https://github.com/user-attachments/assets/74a46046-f038-424a-acd6-f011500c42f3)
-![Image](https://github.com/user-attachments/assets/00b2b607-1fa5-49ac-862b-189d106130f2)
-![Image](https://github.com/user-attachments/assets/2488dec6-3343-4b19-a3fd-cd77d2ed697f)
-![Image](https://github.com/user-attachments/assets/cfc22226-5060-4a26-bdb7-5f4499647363)
-![Image](https://github.com/user-attachments/assets/6ed2cd4b-fc39-4cd4-a2ec-96696b296299)
-![Image](https://github.com/user-attachments/assets/5cb6e2db-a187-4a89-9578-7c8f676062f9)
-![Image](https://github.com/user-attachments/assets/0de278c2-399b-4e10-a043-de3ac7eca0df)
+![Screenshot 1](assets/screenshots/1.jpg)
+![Screenshot 2](assets/screenshots/2.jpg)
+![Screenshot 3](assets/screenshots/3.jpg)
+![Screenshot 4](assets/screenshots/4.jpg)
+![Screenshot 5](assets/screenshots/5.jpg)
+![Screenshot 6](assets/screenshots/6.jpg)
+![Screenshot 7](assets/screenshots/7.jpg)
 
 ## Installation
 - r2modman/Thunderstore: install and launch the game
