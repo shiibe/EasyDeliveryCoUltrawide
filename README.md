@@ -11,13 +11,13 @@ Ultrawide support via camera and UI overlay fixes for Easy Delivery Co. This mod
 - Keeps main UI elements at their intended ratio
 
 ## Screenshots
-![Screenshot 1](assets/screenshots/1.jpg)
-![Screenshot 2](assets/screenshots/2.jpg)
-![Screenshot 3](assets/screenshots/3.jpg)
-![Screenshot 4](assets/screenshots/4.jpg)
-![Screenshot 5](assets/screenshots/5.jpg)
-![Screenshot 6](assets/screenshots/6.jpg)
-![Screenshot 7](assets/screenshots/7.jpg)
+![Screenshot 1](https://raw.githubusercontent.com/shiibe/EasyDeliveryCoUltrawide/refs/heads/main/assets/screenshots/1.jpg)
+![Screenshot 2](https://raw.githubusercontent.com/shiibe/EasyDeliveryCoUltrawide/refs/heads/main/assets/screenshots/2.jpg)
+![Screenshot 3](https://raw.githubusercontent.com/shiibe/EasyDeliveryCoUltrawide/refs/heads/main/assets/screenshots/3.jpg)
+![Screenshot 4](https://raw.githubusercontent.com/shiibe/EasyDeliveryCoUltrawide/refs/heads/main/assets/screenshots/4.jpg)
+![Screenshot 5](https://raw.githubusercontent.com/shiibe/EasyDeliveryCoUltrawide/refs/heads/main/assets/screenshots/5.jpg)
+![Screenshot 6](https://raw.githubusercontent.com/shiibe/EasyDeliveryCoUltrawide/refs/heads/main/assets/screenshots/6.jpg)
+![Screenshot 7](https://raw.githubusercontent.com/shiibe/EasyDeliveryCoUltrawide/refs/heads/main/assets/screenshots/7.jpg)
 
 ## Installation
 - r2modman/Thunderstore: install and launch the game
@@ -34,4 +34,4 @@ Ultrawide support via camera and UI overlay fixes for Easy Delivery Co. This mod
 
 ## Build
 - Build: `dotnet build EasyDeliveryCoUltrawide/EasyDeliveryCoUltrawide.csproj -c Release`
-- Package: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package.ps1 -Version 1.0.5`
+- Package: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package.ps1 -Version 1.0.6`
