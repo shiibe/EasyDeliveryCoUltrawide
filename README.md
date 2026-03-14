@@ -25,6 +25,8 @@ Ultrawide camera and UI overlay fixes for Easy Delivery Co.
 
 #### Configuration
 - Config file: `BepInEx/config/shibe.easydeliveryco.ultrawide.cfg`
+- `enable_mod`: enable/disable the mod
+- `enable_hud_fix`: enable/disable HUD scaling and positioning fixes
 - `aspect_ratio`: `auto` (display), `window`, `21:9`, `32:9`, `2.39`
 
 ## Planned Features

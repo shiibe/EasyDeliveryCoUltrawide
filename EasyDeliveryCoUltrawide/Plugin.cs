@@ -19,14 +19,9 @@ namespace EasyDeliveryCoUltrawide
         private const float DefaultAspect = 16f / 9f;
 
         private static ConfigEntry<bool> _enableMod;
+        private static ConfigEntry<bool> _enableHudFix;
         private static ConfigEntry<bool> _debugMode;
         private static ConfigEntry<string> _aspectRatio;
-        private static ConfigEntry<bool> _hudAutoPosition;
-        private static ConfigEntry<string> _hudAutoPositionMode;
-        private static ConfigEntry<float> _hudOffsetX;
-        private static ConfigEntry<float> _hudOffsetY;
-        private static ConfigEntry<float> _hudPaddingX;
-        private static ConfigEntry<float> _hudPaddingY;
 
         private static ManualLogSource _log;
         private static readonly Dictionary<int, Vector2> OverlayTargetSizes = new Dictionary<int, Vector2>();
@@ -35,7 +30,6 @@ namespace EasyDeliveryCoUltrawide
         private static readonly Dictionary<Type, PixelPerfectFields> PixelPerfectFieldCache = new Dictionary<Type, PixelPerfectFields>();
         private static readonly Dictionary<int, PixelPerfectState> PixelPerfectStates = new Dictionary<int, PixelPerfectState>();
         private static readonly Dictionary<string, int> PerfCounts = new Dictionary<string, int>(StringComparer.Ordinal);
-        private static readonly HashSet<int> HudRendererIds = new HashSet<int>();
         private static readonly Dictionary<Type, MiniRendererFields> MiniRendererFieldCache = new Dictionary<Type, MiniRendererFields>();
         private static readonly Dictionary<int, Vector3> HudDisplayOriginalScales = new Dictionary<int, Vector3>();
         private static readonly int MainTexId = Shader.PropertyToID("_MainTex");
@@ -45,15 +39,10 @@ namespace EasyDeliveryCoUltrawide
         private void Awake()
         {
             _log = Logger;
-            _enableMod = Config.Bind("General", "enable_ultrawide_mode", true, "Enable ultrawide fixes.");
+            _enableMod = Config.Bind("General", "enable_mod", true, "Enable ultrawide fixes.");
             _aspectRatio = Config.Bind("General", "aspect_ratio", "auto", "Aspect ratio override. Examples: auto (display), window, 21:9, 32:9, 2.39.");
             _debugMode = Config.Bind("General", "debug_logging", false, "Log debug information about applied adjustments.");
-            _hudAutoPosition = Config.Bind("HUD", "auto_position", true, "Auto-position HUD based on the display aspect.");
-            _hudAutoPositionMode = Config.Bind("HUD", "auto_position_mode", "fill", "HUD auto positioning mode. Options: fill (spread to full width), safe (center 16:9 safe area).");
-            _hudOffsetX = Config.Bind("HUD", "offset_x", 0f, "HUD horizontal offset in pixels (MiniRenderer units). Positive moves right.");
-            _hudOffsetY = Config.Bind("HUD", "offset_y", 0f, "HUD vertical offset in pixels (MiniRenderer units). Positive moves down.");
-            _hudPaddingX = Config.Bind("HUD", "padding_x", 0f, "HUD auto-position padding in pixels (MiniRenderer units). Positive moves right.");
-            _hudPaddingY = Config.Bind("HUD", "padding_y", 0f, "HUD auto-position padding in pixels (MiniRenderer units). Positive moves down.");
+            _enableHudFix = Config.Bind("HUD", "enable_hud_fix", true, "Enable HUD scaling and positioning fixes.");
 
             if (!_enableMod.Value)
             {
@@ -70,7 +59,6 @@ namespace EasyDeliveryCoUltrawide
             PatchByName(harmony, "IntroDotExe", "Setup", postfix: nameof(IntroDotExe_Setup_Postfix));
             PatchByName(harmony, "ChooseExe", "Setup", postfix: nameof(ChooseExe_Setup_Postfix));
             PatchByName(harmony, "MiniRenderer", "Start", postfix: nameof(MiniRenderer_Start_Postfix));
-            PatchMiniRendererSprite(harmony);
             PatchByName(harmony, "pixelPerfectView", "AdjustViewPlane", prefix: nameof(PixelPerfectView_AdjustViewPlane_Prefix));
             PatchByName(harmony, "sHUD", "Init", postfix: nameof(SHud_Init_Postfix));
             PatchByName(harmony, "sHUD", "FadeToBlack", prefix: nameof(SHud_FadeToBlack_Prefix));
@@ -86,18 +74,9 @@ namespace EasyDeliveryCoUltrawide
             return _enableMod != null && _enableMod.Value;
         }
 
-        private static float GetHudOffsetX()
+        private static bool ShouldApplyHudFix()
         {
-            float offset = _hudOffsetX != null ? _hudOffsetX.Value : 0f;
-            offset += _hudPaddingX != null ? _hudPaddingX.Value : 0f;
-            return offset;
-        }
-
-        private static float GetHudOffsetY()
-        {
-            float offset = _hudOffsetY != null ? _hudOffsetY.Value : 0f;
-            offset += _hudPaddingY != null ? _hudPaddingY.Value : 0f;
-            return offset;
+            return ShouldApply() && _enableHudFix != null && _enableHudFix.Value;
         }
 
 
@@ -578,8 +557,10 @@ namespace EasyDeliveryCoUltrawide
                 return;
             }
 
-            RegisterHudRenderer(__instance);
-            UpdateHudRendererAspect(__instance);
+            if (ShouldApplyHudFix())
+            {
+                UpdateHudRendererAspect(__instance);
+            }
             ScaleBackdropFromField(__instance, "backdrop", Camera.main, "sHUD");
         }
 
@@ -993,7 +974,7 @@ namespace EasyDeliveryCoUltrawide
 
         private static void MiniRenderer_Start_Postfix(object __instance)
         {
-            if (!ShouldApply())
+            if (!ShouldApplyHudFix())
             {
                 return;
             }
@@ -1002,35 +983,6 @@ namespace EasyDeliveryCoUltrawide
             ApplyHudDisplayScale(__instance);
         }
 
-        private static void MiniRenderer_Spr_Prefix(object __instance, Texture texture, float sx, float sy, ref float x, ref float y, float sw, float sh, bool flip, ref float w, ref float h)
-        {
-            if (!ShouldApply())
-            {
-                return;
-            }
-
-            var component = __instance as Component;
-            if (component == null)
-            {
-                return;
-            }
-
-            if (!HudRendererIds.Contains(component.GetInstanceID()))
-            {
-                return;
-            }
-
-            float offsetX = GetHudOffsetX();
-            float offsetY = GetHudOffsetY();
-            if (Mathf.Abs(offsetX) < 0.001f && Mathf.Abs(offsetY) < 0.001f)
-            {
-                return;
-            }
-
-            x += offsetX;
-            y += offsetY;
-        }
-        #pragma warning restore IDE1006
 
         private static void EnsureMiniRendererRenderTexture(object renderer)
         {
@@ -1119,6 +1071,11 @@ namespace EasyDeliveryCoUltrawide
 
         private static void UpdateHudRendererAspect(object hudInstance)
         {
+            if (!ShouldApplyHudFix())
+            {
+                return;
+            }
+
             if (hudInstance == null)
             {
                 return;
@@ -1136,26 +1093,7 @@ namespace EasyDeliveryCoUltrawide
                 return;
             }
 
-            MonoBehaviour miniRenderer = null;
-            var parent = component.transform;
-            while (parent != null)
-            {
-                foreach (var candidate in parent.GetComponents<MonoBehaviour>())
-                {
-                    if (candidate != null && string.Equals(candidate.GetType().Name, "MiniRenderer", StringComparison.Ordinal))
-                    {
-                        miniRenderer = candidate;
-                        break;
-                    }
-                }
-
-                if (miniRenderer != null)
-                {
-                    break;
-                }
-
-                parent = parent.parent;
-            }
+            MonoBehaviour miniRenderer = FindMiniRenderer(component);
 
             if (miniRenderer == null)
             {
@@ -1196,9 +1134,10 @@ namespace EasyDeliveryCoUltrawide
             LogDebug($"Adjusted HUD MiniRenderer width to {targetWidth} for aspect {windowAspect:0.###}.");
         }
 
+
         private static void ApplyHudDisplayScale(object renderer)
         {
-            if (_hudAutoPosition == null || !_hudAutoPosition.Value)
+            if (!ShouldApplyHudFix())
             {
                 return;
             }
@@ -1284,6 +1223,7 @@ namespace EasyDeliveryCoUltrawide
             }
         }
 
+
         private static Texture GetRendererTexture(object renderer)
         {
             var type = renderer.GetType();
@@ -1296,65 +1236,11 @@ namespace EasyDeliveryCoUltrawide
             return rtField.GetValue(renderer) as Texture;
         }
 
-
-        private static void PatchMiniRendererSprite(Harmony harmony)
+        private static MonoBehaviour FindMiniRenderer(Component component)
         {
-            var type = AccessTools.TypeByName("MiniRenderer");
-            if (type == null)
-            {
-                return;
-            }
-
-            MethodInfo method = null;
-            foreach (var candidate in type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
-            {
-                if (!string.Equals(candidate.Name, "spr", StringComparison.Ordinal))
-                {
-                    continue;
-                }
-
-                var parameters = candidate.GetParameters();
-                if (parameters.Length == 10
-                    && typeof(Texture).IsAssignableFrom(parameters[0].ParameterType)
-                    && parameters[1].ParameterType == typeof(float)
-                    && parameters[2].ParameterType == typeof(float)
-                    && parameters[3].ParameterType == typeof(float)
-                    && parameters[4].ParameterType == typeof(float)
-                    && parameters[5].ParameterType == typeof(float)
-                    && parameters[6].ParameterType == typeof(float)
-                    && parameters[7].ParameterType == typeof(bool)
-                    && parameters[8].ParameterType == typeof(float)
-                    && parameters[9].ParameterType == typeof(float))
-                {
-                    method = candidate;
-                    break;
-                }
-            }
-
-            if (method == null)
-            {
-                if (_debugMode != null && _debugMode.Value)
-                {
-                    _log.LogWarning("MiniRenderer.spr overload not found for HUD offset patch.");
-                }
-                return;
-            }
-
-            var prefix = new HarmonyMethod(typeof(Plugin), nameof(MiniRenderer_Spr_Prefix));
-            harmony.Patch(method, prefix);
-        }
-
-        private static void RegisterHudRenderer(object hudInstance)
-        {
-            if (hudInstance == null)
-            {
-                return;
-            }
-
-            var component = hudInstance as Component;
             if (component == null)
             {
-                return;
+                return null;
             }
 
             MonoBehaviour miniRenderer = null;
@@ -1377,41 +1263,10 @@ namespace EasyDeliveryCoUltrawide
 
                 parent = parent.parent;
             }
-            if (miniRenderer == null)
-            {
-                return;
-            }
 
-            var miniComponent = miniRenderer as Component;
-            if (miniComponent == null)
-            {
-                return;
-            }
-
-            int id = miniComponent.GetInstanceID();
-            if (!HudRendererIds.Add(id))
-            {
-                return;
-            }
-
-            var type = miniRenderer.GetType();
-            if (!MiniRendererFieldCache.TryGetValue(type, out var fields))
-            {
-                fields = new MiniRendererFields
-                {
-                    Width = AccessTools.Field(type, "width"),
-                    Height = AccessTools.Field(type, "height")
-                };
-                MiniRendererFieldCache[type] = fields;
-            }
-
-            if (fields.Width == null || fields.Height == null)
-            {
-                return;
-            }
-
-            EnsureMiniRendererRenderTexture(miniRenderer);
+            return miniRenderer;
         }
+
 
 
         private static Camera GetRacePlayerCamera(object racePlayer)
