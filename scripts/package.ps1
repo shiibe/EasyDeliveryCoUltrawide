@@ -11,6 +11,7 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 $pluginName = "EasyDeliveryCoUltrawide"
 $distRoot = Join-Path $repoRoot "Thunderstore"
 $distPlugins = Join-Path $distRoot "BepInEx\plugins\$pluginName"
+$zipRoot = Join-Path $repoRoot "dist"
 
 if (-not (Test-Path $distRoot))
 {
@@ -61,10 +62,14 @@ if (-not (Test-Path $iconPath))
 
 Write-Host "Creating zip package..."
 $zipName = "${pluginName}_$Version.zip"
-$zipPath = Join-Path $repoRoot $zipName
-if (Test-Path $zipPath)
+$zipPath = Join-Path $zipRoot $zipName
+if (Test-Path $zipRoot)
 {
-    Remove-Item $zipPath -Force
+    Remove-Item (Join-Path $zipRoot "*") -Recurse -Force
+}
+else
+{
+    New-Item -ItemType Directory -Force -Path $zipRoot | Out-Null
 }
 
 Compress-Archive -Path (Join-Path $distRoot "*") -DestinationPath $zipPath
