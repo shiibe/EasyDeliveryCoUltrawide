@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Reflection;
 using BepInEx;
 using BepInEx.Configuration;
@@ -24,14 +23,14 @@ namespace EasyDeliveryCoUltrawide
         private static ConfigEntry<string> _aspectRatio;
 
         private static ManualLogSource _log;
-        private static readonly Dictionary<int, Vector2> _overlayTargetSizes = new Dictionary<int, Vector2>();
-        private static readonly Dictionary<int, float> _pixelViewAspects = new Dictionary<int, float>();
-        private static readonly Dictionary<int, float> _pixelViewSkipAspects = new Dictionary<int, float>();
-        private static readonly Dictionary<string, float> _fovOverrideMap = new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
-        private static readonly Dictionary<int, OverlayScaleState> _overlayScaleStates = new Dictionary<int, OverlayScaleState>();
-        private static readonly Dictionary<Type, PixelPerfectFields> _pixelPerfectFieldCache = new Dictionary<Type, PixelPerfectFields>();
-        private static readonly Dictionary<int, PixelPerfectState> _pixelPerfectStates = new Dictionary<int, PixelPerfectState>();
-        private static readonly Dictionary<string, int> _perfCounts = new Dictionary<string, int>(StringComparer.Ordinal);
+        private static readonly Dictionary<int, Vector2> OverlayTargetSizes = new Dictionary<int, Vector2>();
+        private static readonly Dictionary<int, float> PixelViewAspects = new Dictionary<int, float>();
+        private static readonly Dictionary<int, float> PixelViewSkipAspects = new Dictionary<int, float>();
+        private static readonly Dictionary<Type, PixelPerfectFields> PixelPerfectFieldCache = new Dictionary<Type, PixelPerfectFields>();
+        private static readonly Dictionary<int, PixelPerfectState> PixelPerfectStates = new Dictionary<int, PixelPerfectState>();
+        private static readonly Dictionary<string, int> PerfCounts = new Dictionary<string, int>(StringComparer.Ordinal);
+        private static readonly int MainTexId = Shader.PropertyToID("_MainTex");
+        private static readonly int AlphaTexId = Shader.PropertyToID("_AlphaTex");
         private static float _perfLastLogTime;
 
         private void Awake()
@@ -55,7 +54,6 @@ namespace EasyDeliveryCoUltrawide
             PatchByName(harmony, "PauseSystem", "SetFullscreen", postfix: nameof(PauseSystem_SetFullscreen_Postfix));
             PatchByName(harmony, "IntroDotExe", "Setup", postfix: nameof(IntroDotExe_Setup_Postfix));
             PatchByName(harmony, "ChooseExe", "Setup", postfix: nameof(ChooseExe_Setup_Postfix));
-            PatchByName(harmony, "MiniRenderer", "Start", prefix: nameof(MiniRenderer_Start_Prefix));
             PatchByName(harmony, "MiniRenderer", "Start", postfix: nameof(MiniRenderer_Start_Postfix));
             PatchByName(harmony, "pixelPerfectView", "AdjustViewPlane", prefix: nameof(PixelPerfectView_AdjustViewPlane_Prefix));
             PatchByName(harmony, "sHUD", "Init", postfix: nameof(SHud_Init_Postfix));
@@ -116,18 +114,6 @@ namespace EasyDeliveryCoUltrawide
             }
 
             return (float)Screen.width / Screen.height;
-        }
-
-        private static float GetNormalizedAspect()
-        {
-            var current = GetWindowAspect();
-            var target = GetTargetAspect();
-            if (Mathf.Approximately(target, 0f))
-            {
-                return DefaultAspect;
-            }
-
-            return current / target;
         }
 
         private static bool TryParseAspect(string value, out float aspect, out bool useWindow)
@@ -356,6 +342,7 @@ namespace EasyDeliveryCoUltrawide
             return ShouldApply() && IsUltrawide();
         }
 
+        #pragma warning disable IDE1006
         private static void PlayerManager_SetupCameras_Postfix(object __instance)
         {
             if (!ShouldOverrideSplitScreen())
@@ -488,7 +475,7 @@ namespace EasyDeliveryCoUltrawide
             }
 
             var type = __instance.GetType();
-            if (!_pixelPerfectFieldCache.TryGetValue(type, out var fields))
+            if (!PixelPerfectFieldCache.TryGetValue(type, out var fields))
             {
                 fields = new PixelPerfectFields
                 {
@@ -496,7 +483,7 @@ namespace EasyDeliveryCoUltrawide
                     MenuWidth = AccessTools.Field(type, "menuWidth"),
                     MenuHeight = AccessTools.Field(type, "menuHeight")
                 };
-                _pixelPerfectFieldCache[type] = fields;
+                PixelPerfectFieldCache[type] = fields;
             }
 
             if (fields.GameCamera == null || fields.MenuWidth == null || fields.MenuHeight == null)
@@ -537,9 +524,9 @@ namespace EasyDeliveryCoUltrawide
                 Z = component.transform.localPosition.z
             };
 
-            if (!_pixelPerfectStates.TryGetValue(id, out var previous) || !previous.Equals(state))
+            if (!PixelPerfectStates.TryGetValue(id, out var previous) || !previous.Equals(state))
             {
-                _pixelPerfectStates[id] = state;
+                PixelPerfectStates[id] = state;
                 component.transform.localScale = new Vector3(num * aspect, num, 1f);
             }
             LogPixelPerfectScale(component, aspect, sourceAspect);
@@ -606,41 +593,6 @@ namespace EasyDeliveryCoUltrawide
             ScaleOverlaySprites(__instance as Component, menuCamera, "ScreenSystem");
         }
 
-        private static void ScreenSystem_FrameUpdate_Postfix(object __instance)
-        {
-            PerfCount("ScreenSystem.FrameUpdate");
-            if (!ShouldApply() || __instance == null)
-            {
-                return;
-            }
-
-
-            var pauseType = AccessTools.TypeByName("PauseSystem");
-            if (pauseType != null)
-            {
-                var pausedField = AccessTools.Field(pauseType, "paused");
-                if (pausedField != null)
-                {
-                    var paused = (bool)pausedField.GetValue(null);
-                    if (!paused)
-                    {
-                        return;
-                    }
-                }
-            }
-
-            var menuCameraField = AccessTools.Field(__instance.GetType(), "menuCamera");
-            var menuCamera = menuCameraField != null ? menuCameraField.GetValue(__instance) as Camera : null;
-            menuCamera = ResolveMenuCamera(menuCamera);
-            var owner = __instance as Component;
-            if (!ShouldRescaleOverlay(owner, menuCamera))
-            {
-                return;
-            }
-            ScaleBackdropFromField(__instance, "backdrop", menuCamera, "ScreenSystem");
-            ScaleOverlaySprites(owner, menuCamera, "ScreenSystem");
-        }
-
         private static void IntroDotExe_Setup_Postfix(object __instance)
         {
             if (!ShouldApply() || __instance == null)
@@ -665,25 +617,6 @@ namespace EasyDeliveryCoUltrawide
             ApplyMenuCameraAspect(menuCamera);
         }
 
-        private static void MenuScreenTransition_Update_Postfix(object __instance)
-        {
-            PerfCount("MenuScreenTransition.Update");
-            if (!ShouldApply())
-            {
-                return;
-            }
-
-
-            var menuCamera = ResolveMenuCamera(null);
-            var owner = __instance as Component;
-            if (!ShouldRescaleOverlay(owner, menuCamera))
-            {
-                return;
-            }
-            ScaleBackdropFromField(__instance, "backdrop", menuCamera, "MenuScreenTransition");
-            ScaleOverlaySprites(owner, menuCamera, "MenuScreenTransition");
-        }
-
         private static void SceneTransition_Start_Postfix(object __instance)
         {
             if (!ShouldApply() || __instance == null)
@@ -704,7 +637,7 @@ namespace EasyDeliveryCoUltrawide
             ScaleOverlaySprites(__instance as Component, Camera.main, "SceneTransition");
         }
 
-        private static void Steleporter_Teleport_Postfix(object __instance)
+        private static void Steleporter_Teleport_Postfix()
         {
             if (!ShouldApply())
             {
@@ -906,12 +839,12 @@ namespace EasyDeliveryCoUltrawide
             }
 
             int id = spriteRenderer.GetInstanceID();
-            if (_overlayTargetSizes.TryGetValue(id, out var previous) && Approximately(previous, targetSize))
+            if (OverlayTargetSizes.TryGetValue(id, out var previous) && Approximately(previous, targetSize))
             {
                 return;
             }
 
-            _overlayTargetSizes[id] = targetSize;
+            OverlayTargetSizes[id] = targetSize;
             LogDebug($"Resized {label} overlay to {targetSize.x:0.###}x{targetSize.y:0.###} using {cam.name}.");
         }
 
@@ -923,12 +856,12 @@ namespace EasyDeliveryCoUltrawide
             }
 
             int id = component.GetInstanceID();
-            if (_pixelViewAspects.TryGetValue(id, out var previous) && Mathf.Abs(previous - aspect) < 0.001f)
+            if (PixelViewAspects.TryGetValue(id, out var previous) && Mathf.Abs(previous - aspect) < 0.001f)
             {
                 return;
             }
 
-            _pixelViewAspects[id] = aspect;
+            PixelViewAspects[id] = aspect;
             LogDebug($"Resized pixelPerfectView on {component.name} to aspect {aspect:0.###} (source {sourceAspect:0.###}).");
         }
 
@@ -940,12 +873,12 @@ namespace EasyDeliveryCoUltrawide
             }
 
             int id = component.GetInstanceID();
-            if (_pixelViewSkipAspects.TryGetValue(id, out var previous) && Mathf.Abs(previous - sourceAspect) < 0.001f)
+            if (PixelViewSkipAspects.TryGetValue(id, out var previous) && Mathf.Abs(previous - sourceAspect) < 0.001f)
             {
                 return;
             }
 
-            _pixelViewSkipAspects[id] = sourceAspect;
+            PixelViewSkipAspects[id] = sourceAspect;
             LogDebug($"Skipped pixelPerfectView resize on {component.name} (source aspect {sourceAspect:0.###}).");
         }
 
@@ -962,52 +895,7 @@ namespace EasyDeliveryCoUltrawide
             _log.LogInfo(message);
         }
 
-        private static bool ShouldRescaleOverlay(Component owner, Camera cam)
-        {
-            if (owner == null || cam == null)
-            {
-                return true;
-            }
-
-            int id = owner.GetInstanceID();
-            var state = new OverlayScaleState
-            {
-                Width = Screen.width,
-                Height = Screen.height,
-                Aspect = cam.aspect,
-                Fov = cam.fieldOfView,
-                OrthoSize = cam.orthographicSize,
-                IsOrtho = cam.orthographic
-            };
-
-            if (_overlayScaleStates.TryGetValue(id, out var previous) && previous.Equals(state))
-            {
-                return false;
-            }
-
-            _overlayScaleStates[id] = state;
-            return true;
-        }
-
-        private struct OverlayScaleState
-        {
-            public int Width;
-            public int Height;
-            public float Aspect;
-            public float Fov;
-            public float OrthoSize;
-            public bool IsOrtho;
-
-            public bool Equals(OverlayScaleState other)
-            {
-                return Width == other.Width
-                    && Height == other.Height
-                    && Mathf.Abs(Aspect - other.Aspect) < 0.0001f
-                    && Mathf.Abs(Fov - other.Fov) < 0.001f
-                    && Mathf.Abs(OrthoSize - other.OrthoSize) < 0.001f
-                    && IsOrtho == other.IsOrtho;
-            }
-        }
+        
 
         private struct PixelPerfectFields
         {
@@ -1057,14 +945,6 @@ namespace EasyDeliveryCoUltrawide
             return Mathf.Abs(a.x - b.x) < 0.001f && Mathf.Abs(a.y - b.y) < 0.001f;
         }
 
-        private static void MiniRenderer_Start_Prefix(object __instance)
-        {
-            if (!ShouldApply())
-            {
-                return;
-            }
-        }
-
         private static void MiniRenderer_Start_Postfix(object __instance)
         {
             if (!ShouldApply())
@@ -1074,6 +954,7 @@ namespace EasyDeliveryCoUltrawide
 
             EnsureMiniRendererRenderTexture(__instance);
         }
+        #pragma warning restore IDE1006
 
         private static void EnsureMiniRendererRenderTexture(object renderer)
         {
@@ -1139,8 +1020,8 @@ namespace EasyDeliveryCoUltrawide
             var material = matField != null ? matField.GetValue(renderer) as Material : null;
             if (material != null)
             {
-                material.SetTexture("_MainTex", rt);
-                material.SetTexture("_AlphaTex", rt);
+                material.SetTexture(MainTexId, rt);
+                material.SetTexture(AlphaTexId, rt);
                 return;
             }
 
@@ -1156,8 +1037,8 @@ namespace EasyDeliveryCoUltrawide
                 return;
             }
 
-            unityRenderer.material.SetTexture("_MainTex", rt);
-            unityRenderer.material.SetTexture("_AlphaTex", rt);
+            unityRenderer.material.SetTexture(MainTexId, rt);
+            unityRenderer.material.SetTexture(AlphaTexId, rt);
         }
 
 
@@ -1259,15 +1140,6 @@ namespace EasyDeliveryCoUltrawide
             return best;
         }
 
-        private static void Camera_SetRect_Prefix(Camera __instance, ref Rect __0)
-        {
-            PerfCount("Camera.set_rect");
-            if (ShouldForceViewport(__instance, __0))
-            {
-                __0 = BuildFullRect();
-            }
-        }
-
         private static void PerfCount(string key)
         {
             if (_debugMode == null || !_debugMode.Value)
@@ -1275,13 +1147,13 @@ namespace EasyDeliveryCoUltrawide
                 return;
             }
 
-            if (_perfCounts.TryGetValue(key, out var count))
+            if (PerfCounts.TryGetValue(key, out var count))
             {
-                _perfCounts[key] = count + 1;
+                PerfCounts[key] = count + 1;
             }
             else
             {
-                _perfCounts[key] = 1;
+                PerfCounts[key] = 1;
             }
 
             float now = Time.realtimeSinceStartup;
@@ -1296,12 +1168,12 @@ namespace EasyDeliveryCoUltrawide
                 return;
             }
 
-            foreach (var entry in _perfCounts)
+            foreach (var entry in PerfCounts)
             {
                 _log.LogInfo($"Perf [{entry.Key}] calls in 2s: {entry.Value}.");
             }
 
-            _perfCounts.Clear();
+            PerfCounts.Clear();
             _perfLastLogTime = now;
         }
 
