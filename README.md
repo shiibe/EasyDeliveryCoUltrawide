@@ -1,3 +1,5 @@
+<img width="256" height="256" alt="Image" src="https://github.com/user-attachments/assets/5c852127-6fa1-48b4-b94d-84fd1b0ddee4" />
+
 # Easy Delivery Co. - Ultrawide Support Mod
 
 Ultrawide camera and UI overlay fixes for Easy Delivery Co.
