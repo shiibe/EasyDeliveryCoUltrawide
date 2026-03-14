@@ -1,0 +1,73 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net472</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <Nullable>disable</Nullable>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <AssemblyName>EasyDeliveryCoUltrawide</AssemblyName>
+        <RootNamespace>EasyDeliveryCoUltrawide</RootNamespace>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
+        <GameDir>G:\SteamLibrary\steamapps\common\Easy Delivery Co</GameDir>
+        <ProfileDir>C:\Users\Shibe\AppData\Roaming\r2modmanPlus-local\EasyDeliveryCo\profiles\Default</ProfileDir>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Reference Include="BepInEx">
+            <HintPath>$(ProfileDir)\BepInEx\core\BepInEx.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+
+        <Reference Include="0Harmony">
+            <HintPath>$(ProfileDir)\BepInEx\core\0Harmony.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+
+        <Reference Include="UnityEngine">
+            <HintPath>$(GameDir)\EasyDeliveryCo_Data\Managed\UnityEngine.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>$(GameDir)\EasyDeliveryCo_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+
+        <Reference Include="UnityEngine.InputLegacyModule">
+            <HintPath>$(GameDir)\EasyDeliveryCo_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+
+        <Reference Include="UnityEngine.UIModule">
+            <HintPath>$(GameDir)\EasyDeliveryCo_Data\Managed\UnityEngine.UIModule.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="dump\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Remove="dump\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="dump\**" />
+    </ItemGroup>
+
+    <Target Name="CopyToR2ModmanProfile" AfterTargets="Build">
+        <MakeDir Directories="$(ProfileDir)\BepInEx\plugins\EasyDeliveryCoUltrawide" />
+        <Copy
+                SourceFiles="$(TargetDir)$(AssemblyName).dll"
+                DestinationFolder="$(ProfileDir)\BepInEx\plugins\EasyDeliveryCoUltrawide"
+                SkipUnchangedFiles="true" />
+        <Copy
+                SourceFiles="$(TargetDir)$(AssemblyName).pdb"
+                DestinationFolder="$(ProfileDir)\BepInEx\plugins\EasyDeliveryCoUltrawide"
+                SkipUnchangedFiles="true"
+                Condition="Exists('$(TargetDir)$(AssemblyName).pdb')" />
+    </Target>
+
+</Project>
