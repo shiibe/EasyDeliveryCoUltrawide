@@ -187,13 +187,13 @@ namespace EasyDeliveryCoUltrawide
                 return;
             }
 
-            float savedFov = PlayerPrefs.GetFloat(PrefKeyFov, -1f);
-            if (savedFov < 1f)
+            if (!(__instance is sCameraController controller) || controller.cam == null)
             {
                 return;
             }
 
-            if (__instance is sCameraController controller && controller.cam != null)
+            bool firstPerson = controller.firstPerson && !controller.fixedPerspective;
+            if (TryGetSavedFov(firstPerson, out float savedFov))
             {
                 controller.cam.fieldOfView = savedFov;
             }

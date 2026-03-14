@@ -8,8 +8,6 @@ namespace EasyDeliveryCoUltrawide
         public const string ListenerName = "UltrawideMenu";
         public const string ListenerData = "listener_UltrawideMenu";
 
-        private const string PrefKeyFov = "UltrawideFovOverride";
-
         private float _mouseYLock;
         private UIUtil _util;
 
@@ -58,32 +56,41 @@ namespace EasyDeliveryCoUltrawide
             _util.Label("Ultrawide Mod", p.x + p.width / 2f, y);
             y += line + 4f;
 
-            _util.Label("Camera", p.x + p.width / 2f, y);
+            _util.Label("FOV", p.x + p.width / 2f, y);
             y += line;
 
             float fovMin;
             float fovMax;
             GetFovRange(out fovMin, out fovMax);
-            float fov = Mathf.Clamp(GetCurrentFov(), fovMin, fovMax);
-            float fovValue = Mathf.InverseLerp(fovMin, fovMax, fov);
-            _util.ValueLabel($"{fov:0}", p.x + p.width - 12f, y);
-            float? newFovValue = _util.Slider("FOV", fovValue, center, y, ref _mouseYLock);
-            if (newFovValue.HasValue)
+
+            float currentFov = GetCurrentCameraFov();
+
+            float thirdFov = Mathf.Clamp(Plugin.GetSavedFovOrDefault(firstPerson: false, fallback: currentFov), fovMin, fovMax);
+            float thirdValue = Mathf.InverseLerp(fovMin, fovMax, thirdFov);
+            _util.ValueLabel($"{thirdFov:0}", p.x + p.width - 12f, y);
+            float? newThirdValue = _util.Slider("3rd Per.", thirdValue, center, y, ref _mouseYLock);
+            if (newThirdValue.HasValue)
             {
-                float newFov = Mathf.Lerp(fovMin, fovMax, newFovValue.Value);
-                ApplyFov(newFov);
+                float newFov = Mathf.Lerp(fovMin, fovMax, newThirdValue.Value);
+                Plugin.SaveFovOverride(firstPerson: false, fov: newFov);
+            }
+
+            y += line;
+
+            float firstFov = Mathf.Clamp(Plugin.GetSavedFovOrDefault(firstPerson: true, fallback: currentFov), fovMin, fovMax);
+            float firstValue = Mathf.InverseLerp(fovMin, fovMax, firstFov);
+            _util.ValueLabel($"{firstFov:0}", p.x + p.width - 12f, y);
+            float? newFirstValue = _util.Slider("1st Per.", firstValue, center, y, ref _mouseYLock);
+            if (newFirstValue.HasValue)
+            {
+                float newFov = Mathf.Lerp(fovMin, fovMax, newFirstValue.Value);
+                Plugin.SaveFovOverride(firstPerson: true, fov: newFov);
             }
 
         }
 
-        private static float GetCurrentFov()
+        private static float GetCurrentCameraFov()
         {
-            float saved = PlayerPrefs.GetFloat(PrefKeyFov, -1f);
-            if (saved >= 1f)
-            {
-                return saved;
-            }
-
             var pauseSystem = PauseSystem.pauseSystem;
             if (pauseSystem != null && pauseSystem.mainCamera != null)
             {
@@ -97,12 +104,6 @@ namespace EasyDeliveryCoUltrawide
             }
 
             return 70f;
-        }
-
-        private static void ApplyFov(float fov)
-        {
-            PlayerPrefs.SetFloat(PrefKeyFov, fov);
-            Plugin.ApplyFovOverride(fov);
         }
 
         private static void GetFovRange(out float min, out float max)

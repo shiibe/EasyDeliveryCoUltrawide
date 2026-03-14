@@ -10,7 +10,9 @@ namespace EasyDeliveryCoUltrawide
 {
     public partial class Plugin
     {
-        private const string PrefKeyFov = "UltrawideFovOverride";
+        private const string PrefKeyFovLegacy = "UltrawideFovOverride";
+        internal const string PrefKeyFovThirdPerson = "UltrawideFovOverride_ThirdPerson";
+        internal const string PrefKeyFovFirstPerson = "UltrawideFovOverride_FirstPerson";
         private const float DefaultAspect = 16f / 9f;
 
         private static ConfigEntry<bool> _enableMod;
@@ -113,11 +115,52 @@ namespace EasyDeliveryCoUltrawide
                 return;
             }
 
-            float savedFov = PlayerPrefs.GetFloat(PrefKeyFov, -1f);
-            if (savedFov >= 1f)
+            if (TryGetSavedFov(IsFirstPersonViewActive(), out float savedFov))
             {
                 ApplyFovOverride(savedFov);
             }
+        }
+
+        internal static bool TryGetSavedFov(bool firstPerson, out float fov)
+        {
+            string key = firstPerson ? PrefKeyFovFirstPerson : PrefKeyFovThirdPerson;
+            fov = PlayerPrefs.GetFloat(key, -1f);
+            if (fov >= 1f)
+            {
+                return true;
+            }
+
+            if (!firstPerson)
+            {
+                fov = PlayerPrefs.GetFloat(PrefKeyFovLegacy, -1f);
+                if (fov >= 1f)
+                {
+                    return true;
+                }
+            }
+
+            fov = 0f;
+            return false;
+        }
+
+        internal static float GetSavedFovOrDefault(bool firstPerson, float fallback)
+        {
+            return TryGetSavedFov(firstPerson, out float fov) ? fov : fallback;
+        }
+
+        internal static void SaveFovOverride(bool firstPerson, float fov)
+        {
+            PlayerPrefs.SetFloat(firstPerson ? PrefKeyFovFirstPerson : PrefKeyFovThirdPerson, fov);
+            if (IsFirstPersonViewActive() == firstPerson)
+            {
+                ApplyFovOverride(fov);
+            }
+        }
+
+        internal static bool IsFirstPersonViewActive()
+        {
+            var controller = UnityEngine.Object.FindFirstObjectByType<sCameraController>();
+            return controller != null && controller.firstPerson && !controller.fixedPerspective;
         }
 
         internal static void ApplyFovOverride(float fov)
@@ -130,8 +173,8 @@ namespace EasyDeliveryCoUltrawide
             var pauseSystem = PauseSystem.pauseSystem;
             if (pauseSystem != null && pauseSystem.mainCamera != null)
             {
-                float value = Mathf.InverseLerp(pauseSystem.FOVmin + 0.1f, pauseSystem.FOVmax, fov);
-                pauseSystem.UpdateFOV(Mathf.Clamp01(value));
+                PauseSystem.FOV = fov;
+                pauseSystem.mainCamera.fieldOfView = fov;
                 return;
             }
 
