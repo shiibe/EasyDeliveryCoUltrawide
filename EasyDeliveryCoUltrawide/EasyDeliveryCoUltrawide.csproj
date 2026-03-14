@@ -10,7 +10,7 @@
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 
         <GameDir>G:\SteamLibrary\steamapps\common\Easy Delivery Co</GameDir>
-        <ProfileDir>C:\Users\Shibe\AppData\Roaming\r2modmanPlus-local\EasyDeliveryCo\profiles\Default</ProfileDir>
+        <ProfileDir>C:\Users\Shibe\AppData\Roaming\r2modmanPlus-local\EasyDeliveryCo\profiles\Ultrawide-Workspace</ProfileDir>
     </PropertyGroup>
 
     <ItemGroup>
