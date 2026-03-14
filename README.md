@@ -2,22 +2,22 @@
 
 # Easy Delivery Co. - Ultrawide Support Mod
 
-Ultrawide camera and UI overlay fixes for Easy Delivery Co.
+Ultrawide support via camera and UI overlay fixes for Easy Delivery Co. This mod unlocks viewport scaling for wide displays, keeps HUD elements readable, and ensures menus and transitions stretch cleanly across ultrawide aspect ratios.
 
 ## Features
 - Unlocks camera viewports for ultrawide displays
-- Optional FOV overrides for gameplay and named cameras
+- Optional aspect ratio overrides for gameplay and menu cameras
 - Scales menu, pause, and transition overlays to full width
 - Keeps main UI elements at their intended ratio
 
 ## Screenshots
 ![Image](https://github.com/user-attachments/assets/74a46046-f038-424a-acd6-f011500c42f3)
-![Image](https://github.com/user-attachments/assets/f70c3cc4-60c9-4049-aed4-45fd60015ebf)
-![Image](https://github.com/user-attachments/assets/e79b30dc-b45d-4e84-af9f-bac758e97cce)
-![Image](https://github.com/user-attachments/assets/936045aa-ec3a-4b76-bf15-f09a25003034)
-![Image](https://github.com/user-attachments/assets/e87b4c2a-e66e-431f-b301-9bd7b770daea)
-![Image](https://github.com/user-attachments/assets/52984af7-e949-4c3d-a01b-4caa055d8484)
-
+![Image](https://github.com/user-attachments/assets/00b2b607-1fa5-49ac-862b-189d106130f2)
+![Image](https://github.com/user-attachments/assets/2488dec6-3343-4b19-a3fd-cd77d2ed697f)
+![Image](https://github.com/user-attachments/assets/cfc22226-5060-4a26-bdb7-5f4499647363)
+![Image](https://github.com/user-attachments/assets/6ed2cd4b-fc39-4cd4-a2ec-96696b296299)
+![Image](https://github.com/user-attachments/assets/5cb6e2db-a187-4a89-9578-7c8f676062f9)
+![Image](https://github.com/user-attachments/assets/0de278c2-399b-4e10-a043-de3ac7eca0df)
 
 ## Installation
 - r2modman/Thunderstore: install and launch the game
