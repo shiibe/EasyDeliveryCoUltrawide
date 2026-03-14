@@ -58,6 +58,7 @@ namespace EasyDeliveryCoUltrawide
             PatchByName(harmony, "PauseSystem", "SetFullscreen", postfix: nameof(PauseSystem_SetFullscreen_Postfix));
             PatchByName(harmony, "IntroDotExe", "Setup", postfix: nameof(IntroDotExe_Setup_Postfix));
             PatchByName(harmony, "ChooseExe", "Setup", postfix: nameof(ChooseExe_Setup_Postfix));
+            PatchByName(harmony, "CamDotExe", "Start", postfix: nameof(CamDotExe_Start_Postfix));
             PatchByName(harmony, "MiniRenderer", "Start", postfix: nameof(MiniRenderer_Start_Postfix));
             PatchByName(harmony, "pixelPerfectView", "AdjustViewPlane", prefix: nameof(PixelPerfectView_AdjustViewPlane_Prefix));
             PatchByName(harmony, "sHUD", "Init", postfix: nameof(SHud_Init_Postfix));
@@ -636,6 +637,42 @@ namespace EasyDeliveryCoUltrawide
             var field = AccessTools.Field(__instance.GetType(), "menuCamera");
             var menuCamera = field != null ? field.GetValue(__instance) as GameObject : null;
             ApplyMenuCameraAspect(menuCamera);
+        }
+
+        private static void CamDotExe_Start_Postfix(object __instance)
+        {
+            if (!ShouldApply() || __instance == null)
+            {
+                return;
+            }
+
+            var freeCamField = AccessTools.Field(__instance.GetType(), "freecam");
+            if (freeCamField == null)
+            {
+                return;
+            }
+
+            var freeCam = freeCamField.GetValue(__instance) as Component;
+            if (freeCam == null)
+            {
+                return;
+            }
+
+            var camField = AccessTools.Field(freeCam.GetType(), "cam");
+            if (camField == null)
+            {
+                return;
+            }
+
+            var cam = camField.GetValue(freeCam) as Camera;
+            if (cam == null)
+            {
+                LogDebug("CamDotExe freecam camera not found for aspect fix.");
+                return;
+            }
+
+            ApplyMenuCameraAspect(cam);
+            LogDebug($"Applied CamDotExe freecam aspect fix to {cam.name} ({cam.GetInstanceID()}).");
         }
 
         private static void SceneTransition_Start_Postfix(object __instance)
