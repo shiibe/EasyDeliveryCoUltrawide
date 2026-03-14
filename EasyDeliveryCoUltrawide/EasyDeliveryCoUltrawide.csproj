@@ -43,6 +43,11 @@
             <HintPath>$(GameDir)\EasyDeliveryCo_Data\Managed\UnityEngine.UIModule.dll</HintPath>
             <Private>false</Private>
         </Reference>
+
+        <Reference Include="Assembly-CSharp">
+            <HintPath>$(GameDir)\EasyDeliveryCo_Data\Managed\Assembly-CSharp.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
     </ItemGroup>
 
     <ItemGroup>

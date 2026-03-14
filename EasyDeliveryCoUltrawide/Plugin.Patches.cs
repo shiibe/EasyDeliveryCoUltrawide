@@ -28,6 +28,8 @@ namespace EasyDeliveryCoUltrawide
             PatchByName(harmony, "PauseSystem", "Start", postfix: nameof(PauseSystem_Start_Postfix));
             PatchByName(harmony, "PauseSystem", "SetResolution", postfix: nameof(PauseSystem_SetResolution_Postfix));
             PatchByName(harmony, "PauseSystem", "SetFullscreen", postfix: nameof(PauseSystem_SetFullscreen_Postfix));
+            PatchByName(harmony, "PauseSystem", "TogglePaused", postfix: nameof(PauseSystem_TogglePaused_Postfix));
+            PatchByName(harmony, "sCameraController", "LateUpdate", postfix: nameof(SCameraController_LateUpdate_Postfix));
             PatchByName(harmony, "IntroDotExe", "Setup", postfix: nameof(IntroDotExe_Setup_Postfix));
             PatchByName(harmony, "ChooseExe", "Setup", postfix: nameof(ChooseExe_Setup_Postfix));
             PatchByName(harmony, "CamDotExe", "Start", postfix: nameof(CamDotExe_Start_Postfix));
@@ -40,6 +42,7 @@ namespace EasyDeliveryCoUltrawide
             PatchByName(harmony, "ScreenSystem", "DoTransition", postfix: nameof(ScreenSystem_DoTransition_Postfix));
             PatchByName(harmony, "SceneTransition", "Start", postfix: nameof(SceneTransition_Start_Postfix));
             PatchByName(harmony, "sTeleporter", "Teleport", postfix: nameof(Steleporter_Teleport_Postfix));
+            PatchByName(harmony, "DesktopDotExe", "Setup", postfix: nameof(DesktopDotExe_Setup_Postfix));
         }
 
         private static bool ShouldOverrideSplitScreen()
@@ -135,6 +138,7 @@ namespace EasyDeliveryCoUltrawide
 
             ApplyAllCameras();
             ScaleOverlayBackdrops();
+            ApplySavedMenuSettings();
         }
 
         private static void PauseSystem_SetResolution_Postfix()
@@ -146,6 +150,7 @@ namespace EasyDeliveryCoUltrawide
 
             ApplyAllCameras();
             ScaleOverlayBackdrops();
+            ApplySavedMenuSettings();
         }
 
         private static void PauseSystem_SetFullscreen_Postfix()
@@ -157,6 +162,36 @@ namespace EasyDeliveryCoUltrawide
 
             ApplyAllCameras();
             ScaleOverlayBackdrops();
+            ApplySavedMenuSettings();
+        }
+
+        private static void PauseSystem_TogglePaused_Postfix()
+        {
+            if (!ShouldApply())
+            {
+                return;
+            }
+
+            ApplySavedMenuSettings();
+        }
+
+        private static void SCameraController_LateUpdate_Postfix(object __instance)
+        {
+            if (!ShouldApply())
+            {
+                return;
+            }
+
+            float savedFov = PlayerPrefs.GetFloat(PrefKeyFov, -1f);
+            if (savedFov < 1f)
+            {
+                return;
+            }
+
+            if (__instance is sCameraController controller && controller.cam != null)
+            {
+                controller.cam.fieldOfView = savedFov;
+            }
         }
 
         private static void SHud_Init_Postfix(object __instance)

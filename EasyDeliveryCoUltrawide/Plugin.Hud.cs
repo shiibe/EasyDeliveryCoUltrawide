@@ -9,6 +9,35 @@ namespace EasyDeliveryCoUltrawide
 {
     public partial class Plugin
     {
+        internal static void RefreshHudDisplayScale()
+        {
+            if (!ShouldApplyHudFix())
+            {
+                return;
+            }
+
+            var hudType = AccessTools.TypeByName("sHUD");
+            if (hudType == null)
+            {
+                return;
+            }
+
+            var hud = UnityEngine.Object.FindFirstObjectByType(hudType) as Component;
+            if (hud == null)
+            {
+                return;
+            }
+
+            MonoBehaviour miniRenderer = FindMiniRenderer(hud);
+            if (miniRenderer == null)
+            {
+                return;
+            }
+
+            EnsureMiniRendererRenderTexture(miniRenderer);
+            ApplyHudDisplayScale(miniRenderer);
+        }
+
         private struct PixelPerfectFields
         {
             public FieldInfo GameCamera;

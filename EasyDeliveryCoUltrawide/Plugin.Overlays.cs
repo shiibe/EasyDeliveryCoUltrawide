@@ -5,6 +5,23 @@ namespace EasyDeliveryCoUltrawide
 {
     public partial class Plugin
     {
+        internal static void RefreshHudBackdrop()
+        {
+            var hudType = HarmonyLib.AccessTools.TypeByName("sHUD");
+            if (hudType == null)
+            {
+                return;
+            }
+
+            var hud = UnityEngine.Object.FindFirstObjectByType(hudType);
+            if (hud == null)
+            {
+                return;
+            }
+
+            ScaleBackdropFromField(hud, "backdrop", Camera.main, "sHUD");
+        }
+
         private static void ScaleOverlayBackdrops()
         {
             if (!ShouldApply())

@@ -8,6 +8,7 @@ namespace EasyDeliveryCoUltrawide
 {
     public partial class Plugin
     {
+        private const string PrefKeyFov = "UltrawideFovOverride";
         private const float DefaultAspect = 16f / 9f;
 
         private static ConfigEntry<bool> _enableMod;
@@ -36,6 +37,99 @@ namespace EasyDeliveryCoUltrawide
         private static bool ShouldApplyHudFix()
         {
             return ShouldApply() && _enableHudFix != null && _enableHudFix.Value;
+        }
+
+        internal static bool GetEnableMod()
+        {
+            return _enableMod != null && _enableMod.Value;
+        }
+
+        internal static void SetEnableMod(bool value)
+        {
+            if (_enableMod == null)
+            {
+                return;
+            }
+
+            _enableMod.Value = value;
+        }
+
+        internal static bool GetEnableHudFix()
+        {
+            return _enableHudFix != null && _enableHudFix.Value;
+        }
+
+        internal static void SetEnableHudFix(bool value)
+        {
+            if (_enableHudFix == null)
+            {
+                return;
+            }
+
+            _enableHudFix.Value = value;
+        }
+
+        internal static bool GetDebugMode()
+        {
+            return _debugMode != null && _debugMode.Value;
+        }
+
+        internal static void SetDebugMode(bool value)
+        {
+            if (_debugMode == null)
+            {
+                return;
+            }
+
+            _debugMode.Value = value;
+        }
+
+        internal static string GetAspectRatioValue()
+        {
+            return _aspectRatio != null ? _aspectRatio.Value : "auto";
+        }
+
+        internal static void SetAspectRatioValue(string value)
+        {
+            if (_aspectRatio == null)
+            {
+                return;
+            }
+
+            _aspectRatio.Value = value ?? "auto";
+        }
+
+        internal static void ApplySavedMenuSettings()
+        {
+            if (!ShouldApply())
+            {
+                return;
+            }
+
+            float savedFov = PlayerPrefs.GetFloat(PrefKeyFov, -1f);
+            if (savedFov >= 1f)
+            {
+                ApplyFovOverride(savedFov);
+            }
+        }
+
+        internal static void ApplyFovOverride(float fov)
+        {
+            var pauseSystem = PauseSystem.pauseSystem;
+            if (pauseSystem != null && pauseSystem.mainCamera != null)
+            {
+                float value = Mathf.InverseLerp(pauseSystem.FOVmin + 0.1f, pauseSystem.FOVmax, fov);
+                pauseSystem.UpdateFOV(Mathf.Clamp01(value));
+                return;
+            }
+
+            PauseSystem.FOV = fov;
+
+            var cam = Camera.main;
+            if (cam != null)
+            {
+                cam.fieldOfView = fov;
+            }
         }
 
         private static float GetTargetAspect()
