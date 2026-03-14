@@ -34,4 +34,4 @@ Ultrawide camera and UI overlay fixes for Easy Delivery Co.
 
 ## Build
 - Build: `dotnet build EasyDeliveryCoUltrawide/EasyDeliveryCoUltrawide.csproj -c Release`
-- Package: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package.ps1 -Version 1.0.4`
+- Package: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package.ps1 -Version 1.0.5`

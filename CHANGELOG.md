@@ -1,3 +1,7 @@
+## 1.0.5
+- Rename `enable_ultrawide_mode` to `enable_mod`.
+- Add `enable_hud_fix` toggle to control HUD scaling behavior.
+
 ## 1.0.4
 - Remove the FOV override patching and related config entries.
 - Simplify configuration docs to match current options.
