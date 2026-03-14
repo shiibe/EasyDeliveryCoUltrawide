@@ -1,6 +1,6 @@
 {
     "name":  "EasyDeliveryCoUltrawide",
-    "version_number":  "1.0.3",
+    "version_number":  "1.0.4",
     "website_url":  "https://github.com/shiibe/EasyDeliveryCoUltrawide",
     "description":  "Ultrawide support for Easy Delivery Co.",
     "dependencies":  [

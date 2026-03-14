@@ -1,3 +1,7 @@
+## 1.0.4
+- Remove the FOV override patching and related config entries.
+- Simplify configuration docs to match current options.
+
 ## 1.0.3
 - Force menu cameras to use the target aspect ratio on intro/choose screens.
 - Apply aspect fixes to primary gameplay cameras on refresh.

@@ -15,25 +15,18 @@ namespace EasyDeliveryCoUltrawide
     {
         public const string PluginGuid = "shibe.easydeliveryco.ultrawide";
         public const string PluginName = "Ultrawide Mod";
-        public const string PluginVersion = "1.0.3";
+        public const string PluginVersion = "1.0.4";
 
         private const float DefaultAspect = 16f / 9f;
-        private const float FovMin = 40f;
-        private const float FovMax = 120f;
 
         private static ConfigEntry<bool> _enableMod;
         private static ConfigEntry<bool> _debugMode;
         private static ConfigEntry<string> _aspectRatio;
-        private static ConfigEntry<float> _fovOverride;
-        private static ConfigEntry<float> _fovCameraPersp;
-        private static ConfigEntry<float> _fovCamera;
-        private static ConfigEntry<float> _fovRearViewCam;
 
         private static ManualLogSource _log;
         private static readonly Dictionary<int, Vector2> _overlayTargetSizes = new Dictionary<int, Vector2>();
         private static readonly Dictionary<int, float> _pixelViewAspects = new Dictionary<int, float>();
         private static readonly Dictionary<int, float> _pixelViewSkipAspects = new Dictionary<int, float>();
-        private static readonly Dictionary<int, float> _fovLogged = new Dictionary<int, float>();
         private static readonly Dictionary<string, float> _fovOverrideMap = new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
         private static readonly Dictionary<int, OverlayScaleState> _overlayScaleStates = new Dictionary<int, OverlayScaleState>();
         private static readonly Dictionary<Type, PixelPerfectFields> _pixelPerfectFieldCache = new Dictionary<Type, PixelPerfectFields>();
@@ -47,10 +40,6 @@ namespace EasyDeliveryCoUltrawide
             _enableMod = Config.Bind("General", "enable_ultrawide_mode", true, "Enable ultrawide fixes.");
             _aspectRatio = Config.Bind("General", "aspect_ratio", "auto", "Aspect ratio override. Examples: auto (display), window, 21:9, 32:9, 2.39.");
             _debugMode = Config.Bind("General", "debug_logging", false, "Log debug information about applied adjustments.");
-            _fovOverride = Config.Bind("Camera", "fov_override", 0f, "Override gameplay camera FOV (40-120). Set to 0 to use in-game setting.");
-            _fovCameraPersp = Config.Bind("Camera", "fov_camera_persp", 0f, "Override FOV for camera name 'Camera Persp' (Fixed Camera) (40-120). 0 uses global.");
-            _fovCamera = Config.Bind("Camera", "fov_camera", 0f, "Override FOV for camera name 'Camera' (First-person view camera) (40-120). 0 uses global.");
-            _fovRearViewCam = Config.Bind("Camera", "fov_rearviewcam", 0f, "Override FOV for camera name 'RearViewCam' (Driving/Walking camera) (40-120). 0 uses global.");
 
             if (!_enableMod.Value)
             {
@@ -64,7 +53,6 @@ namespace EasyDeliveryCoUltrawide
             PatchByName(harmony, "PauseSystem", "Start", postfix: nameof(PauseSystem_Start_Postfix));
             PatchByName(harmony, "PauseSystem", "SetResolution", postfix: nameof(PauseSystem_SetResolution_Postfix));
             PatchByName(harmony, "PauseSystem", "SetFullscreen", postfix: nameof(PauseSystem_SetFullscreen_Postfix));
-            PatchByName(harmony, "PauseSystem", "UpdateFOV", prefix: nameof(PauseSystem_UpdateFOV_Prefix));
             PatchByName(harmony, "IntroDotExe", "Setup", postfix: nameof(IntroDotExe_Setup_Postfix));
             PatchByName(harmony, "ChooseExe", "Setup", postfix: nameof(ChooseExe_Setup_Postfix));
             PatchByName(harmony, "MiniRenderer", "Start", prefix: nameof(MiniRenderer_Start_Prefix));
@@ -84,77 +72,6 @@ namespace EasyDeliveryCoUltrawide
             return _enableMod != null && _enableMod.Value;
         }
 
-        private static bool HasFovOverride()
-        {
-            return _fovOverride != null && _fovOverride.Value > 0.01f;
-        }
-
-        private static float GetFovOverride()
-        {
-            if (!HasFovOverride())
-            {
-                return 0f;
-            }
-
-            return Mathf.Clamp(_fovOverride.Value, FovMin, FovMax);
-        }
-
-        private static float GetCameraFovOverride(Camera camera)
-        {
-            if (camera == null)
-            {
-                return 0f;
-            }
-
-            float namedOverride = GetNamedFovOverride(camera.name);
-            if (namedOverride > 0.01f)
-            {
-                return namedOverride;
-            }
-
-            return GetFovOverride();
-        }
-
-        private static float GetNamedFovOverride(string cameraName)
-        {
-            if (string.IsNullOrWhiteSpace(cameraName))
-            {
-                return 0f;
-            }
-
-            if (string.Equals(cameraName, "Camera Persp", StringComparison.OrdinalIgnoreCase))
-            {
-                return ClampFovConfig(_fovCameraPersp);
-            }
-
-            if (string.Equals(cameraName, "Camera", StringComparison.OrdinalIgnoreCase))
-            {
-                return ClampFovConfig(_fovCamera);
-            }
-
-            if (string.Equals(cameraName, "RearViewCam", StringComparison.OrdinalIgnoreCase))
-            {
-                return ClampFovConfig(_fovRearViewCam);
-            }
-
-            return 0f;
-        }
-
-        private static float ClampFovConfig(ConfigEntry<float> entry)
-        {
-            if (entry == null)
-            {
-                return 0f;
-            }
-
-            float value = entry.Value;
-            if (value <= 0.01f)
-            {
-                return 0f;
-            }
-
-            return Mathf.Clamp(value, FovMin, FovMax);
-        }
 
         private static float GetTargetAspect()
         {
@@ -432,80 +349,6 @@ namespace EasyDeliveryCoUltrawide
         }
 
 
-        private static void ApplyCameraFov(Camera camera)
-        {
-            if (camera == null)
-            {
-                return;
-            }
-
-            if (!ShouldApply() || !HasFovOverride())
-            {
-                return;
-            }
-
-            if (!IsPrimaryGameplayCamera(camera))
-            {
-                return;
-            }
-
-            float fov = GetCameraFovOverride(camera);
-            if (fov <= 0.01f)
-            {
-                return;
-            }
-
-            camera.fieldOfView = fov;
-            LogFovOverride(camera, fov);
-        }
-
-        private static void ApplyAllCameraFov()
-        {
-            if (!ShouldApply() || !HasFovOverride())
-            {
-                return;
-            }
-
-            foreach (var camera in Camera.allCameras)
-            {
-                ApplyCameraFov(camera);
-            }
-        }
-
-        private static void ApplyPauseSystemFov(float fov)
-        {
-            if (fov <= 0.01f)
-            {
-                return;
-            }
-
-            var pauseType = AccessTools.TypeByName("PauseSystem");
-            if (pauseType == null)
-            {
-                return;
-            }
-
-            var fovField = AccessTools.Field(pauseType, "FOV");
-            if (fovField != null)
-            {
-                fovField.SetValue(null, fov);
-            }
-
-            var pauseSystemField = AccessTools.Field(pauseType, "pauseSystem");
-            var pauseInstance = pauseSystemField != null ? pauseSystemField.GetValue(null) : null;
-            if (pauseInstance == null)
-            {
-                return;
-            }
-
-            var mainCameraField = AccessTools.Field(pauseType, "mainCamera");
-            var mainCamera = mainCameraField != null ? mainCameraField.GetValue(pauseInstance) as Camera : null;
-            if (mainCamera != null)
-            {
-                mainCamera.fieldOfView = fov;
-                LogDebug($"Forced PauseSystem main camera FOV to {fov:0.##}.");
-            }
-        }
 
 
         private static bool ShouldOverrideSplitScreen()
@@ -548,7 +391,6 @@ namespace EasyDeliveryCoUltrawide
                 var camera = go.GetComponentInChildren<Camera>();
                 ApplyCameraAspect(camera);
                 ApplyCameraViewport(camera);
-                ApplyCameraFov(camera);
             }
         }
 
@@ -597,11 +439,9 @@ namespace EasyDeliveryCoUltrawide
                 var mainCameraField = AccessTools.Field(__instance.GetType(), "mainCamera");
                 var mainCamera = mainCameraField != null ? mainCameraField.GetValue(__instance) as Camera : null;
                 ApplyCameraAspect(mainCamera);
-                ApplyCameraFov(mainCamera);
             }
 
             ApplyAllCameras();
-            ApplyAllCameraFov();
             ScaleOverlayBackdrops();
         }
 
@@ -613,7 +453,6 @@ namespace EasyDeliveryCoUltrawide
             }
 
             ApplyAllCameras();
-            ApplyAllCameraFov();
             ScaleOverlayBackdrops();
         }
 
@@ -625,23 +464,7 @@ namespace EasyDeliveryCoUltrawide
             }
 
             ApplyAllCameras();
-            ApplyAllCameraFov();
             ScaleOverlayBackdrops();
-        }
-
-        private static bool PauseSystem_UpdateFOV_Prefix()
-        {
-            if (!ShouldApply() || !HasFovOverride())
-            {
-                return true;
-            }
-
-            float targetFov = GetFovOverride();
-            ApplyPauseSystemFov(targetFov);
-
-            ApplyAllCameraFov();
-            ScaleOverlayBackdrops();
-            return false;
         }
 
         private static bool PixelPerfectView_AdjustViewPlane_Prefix(object __instance)
@@ -1128,22 +951,6 @@ namespace EasyDeliveryCoUltrawide
 
 
 
-        private static void LogFovOverride(Camera camera, float fov)
-        {
-            if (_debugMode == null || !_debugMode.Value)
-            {
-                return;
-            }
-
-            int id = camera.GetInstanceID();
-            if (_fovLogged.TryGetValue(id, out var previous) && Mathf.Abs(previous - fov) < 0.01f)
-            {
-                return;
-            }
-
-            _fovLogged[id] = fov;
-            LogDebug($"Forced FOV for {camera.name} ({id}) to {fov:0.##}.");
-        }
 
         private static void LogDebug(string message)
         {

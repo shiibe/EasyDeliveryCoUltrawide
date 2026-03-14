@@ -26,14 +26,10 @@ Ultrawide camera and UI overlay fixes for Easy Delivery Co.
 #### Configuration
 - Config file: `BepInEx/config/shibe.easydeliveryco.ultrawide.cfg`
 - `aspect_ratio`: `auto` (display), `window`, `21:9`, `32:9`, `2.39`
-- `fov_global`: set to 0 to use in-game setting
-- `fov_rearview`: driving/walking camera override
-- `fov_camera`: first-person camera override
-- `fov_camera_persp`: fixed perspective camera override
 
 ## Planned Features
 - Add menu in-game for FOV settings
 
 ## Build
 - Build: `dotnet build EasyDeliveryCoUltrawide/EasyDeliveryCoUltrawide.csproj -c Release`
-- Package: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package.ps1 -Version 1.0.3`
+- Package: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package.ps1 -Version 1.0.4`
