@@ -33,6 +33,7 @@ namespace EasyDeliveryCoUltrawide
             PatchByName(harmony, "PauseSystem", "SetResolution", postfix: nameof(PauseSystem_SetResolution_Postfix));
             PatchByName(harmony, "PauseSystem", "SetFullscreen", postfix: nameof(PauseSystem_SetFullscreen_Postfix));
             PatchByName(harmony, "PauseSystem", "TogglePaused", postfix: nameof(PauseSystem_TogglePaused_Postfix));
+            PatchByName(harmony, "sCameraController", "Update", postfix: nameof(SCameraController_Update_Postfix));
             PatchByName(harmony, "sCameraController", "LateUpdate", postfix: nameof(SCameraController_LateUpdate_Postfix));
             PatchByName(harmony, "IntroDotExe", "Setup", postfix: nameof(IntroDotExe_Setup_Postfix));
             PatchByName(harmony, "ChooseExe", "Setup", postfix: nameof(ChooseExe_Setup_Postfix));

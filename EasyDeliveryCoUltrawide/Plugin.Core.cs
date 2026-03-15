@@ -15,6 +15,8 @@ namespace EasyDeliveryCoUltrawide
         internal const string PrefKeyFovFirstPerson = "UltrawideFovOverride_FirstPerson";
         internal const string PrefKeyPixelationMode = "UltrawidePixelationMode";
         private const string PrefKeyPixelationModeVersion = "UltrawidePixelationModeVersion";
+        internal const string PrefKeyViewDistanceMode = "UltrawideViewDistanceMode";
+        private const string PrefKeyViewDistanceModeVersion = "UltrawideViewDistanceModeVersion";
         private const float DefaultAspect = 16f / 9f;
 
         private static ConfigEntry<bool> _enableMod;
@@ -42,6 +44,7 @@ namespace EasyDeliveryCoUltrawide
         private static float _perfLastLogTime;
 
         private static int _pixelationMode = -1;
+        private static int _viewDistanceMode = -1;
 
         private static bool _insideLookupInit;
         private static Type _ambianceType;
@@ -132,6 +135,60 @@ namespace EasyDeliveryCoUltrawide
 
             GetPixelationMode();
             RefreshPixelation();
+
+            GetViewDistanceMode();
+            RefreshViewDistance();
+        }
+
+        internal static int GetViewDistanceMode()
+        {
+            if (_viewDistanceMode >= 0)
+            {
+                return _viewDistanceMode;
+            }
+
+            int raw = PlayerPrefs.GetInt(PrefKeyViewDistanceMode, 1);
+            int version = PlayerPrefs.GetInt(PrefKeyViewDistanceModeVersion, 1);
+
+            // v1 mapping: 0 Default, 1 Far, 2 Farther, 3 Distant, 4 Max
+            // v2 mapping: 0 Near, 1 Default, 2 Far, 3 Max
+            if (version < 2 && PlayerPrefs.HasKey(PrefKeyViewDistanceMode))
+            {
+                int migrated;
+                switch (raw)
+                {
+                    case 1:
+                        migrated = 0; // old Far -> Near
+                        break;
+                    case 3:
+                        migrated = 2; // old Distant -> Far
+                        break;
+                    case 4:
+                        migrated = 3; // old Max -> Max
+                        break;
+                    case 0:
+                    case 2:
+                    default:
+                        migrated = 1; // old Default/Farther/other -> Default
+                        break;
+                }
+
+                raw = migrated;
+                PlayerPrefs.SetInt(PrefKeyViewDistanceModeVersion, 2);
+                PlayerPrefs.SetInt(PrefKeyViewDistanceMode, raw);
+            }
+
+            _viewDistanceMode = Mathf.Clamp(raw, 0, 3);
+            return _viewDistanceMode;
+        }
+
+        internal static void SaveViewDistanceMode(int mode)
+        {
+            mode = Mathf.Clamp(mode, 0, 3);
+            _viewDistanceMode = mode;
+            PlayerPrefs.SetInt(PrefKeyViewDistanceModeVersion, 2);
+            PlayerPrefs.SetInt(PrefKeyViewDistanceMode, mode);
+            RefreshViewDistance();
         }
 
         internal static int GetPixelationMode()

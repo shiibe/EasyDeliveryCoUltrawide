@@ -112,6 +112,33 @@ namespace EasyDeliveryCoUltrawide
                 }
             }
 
+            y += line + 4f;
+
+            _util.Label("View Distance", p.x + p.width / 2f, y);
+            y += line;
+
+            int viewMode = Plugin.GetViewDistanceMode();
+            string viewLabel = viewMode switch
+            {
+                0 => "Near",
+                1 => "Default",
+                2 => "Far",
+                3 => "Max",
+                _ => "Default"
+            };
+            _util.ValueLabel(viewLabel, p.x + p.width - 12f, y);
+
+            float viewValue = Mathf.Clamp01(viewMode / 3f);
+            float? newViewValue = _util.Slider("Distance", viewValue, center, y, ref _mouseYLock);
+            if (newViewValue.HasValue)
+            {
+                int newMode = Mathf.Clamp(Mathf.RoundToInt(newViewValue.Value * 3f), 0, 3);
+                if (newMode != viewMode)
+                {
+                    Plugin.SaveViewDistanceMode(newMode);
+                }
+            }
+
         }
 
         private static float GetCurrentCameraFov()
