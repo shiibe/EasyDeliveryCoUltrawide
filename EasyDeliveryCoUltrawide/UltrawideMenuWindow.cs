@@ -86,7 +86,7 @@ namespace EasyDeliveryCoUltrawide
 
             y += line + 4f;
 
-            _util.Label("Pixelation", p.x + p.width / 2f, y);
+            _util.Label("Renderer", p.x + p.width / 2f, y);
             y += line;
 
             int pixelMode = Plugin.GetPixelationMode();
@@ -114,9 +114,6 @@ namespace EasyDeliveryCoUltrawide
 
             y += line + 4f;
 
-            _util.Label("View Distance", p.x + p.width / 2f, y);
-            y += line;
-
             int viewMode = Plugin.GetViewDistanceMode();
             string viewLabel = viewMode switch
             {
@@ -129,7 +126,7 @@ namespace EasyDeliveryCoUltrawide
             _util.ValueLabel(viewLabel, p.x + p.width - 12f, y);
 
             float viewValue = Mathf.Clamp01(viewMode / 3f);
-            float? newViewValue = _util.Slider("Distance", viewValue, center, y, ref _mouseYLock);
+            float? newViewValue = _util.Slider("View Distance", viewValue, center, y, ref _mouseYLock);
             if (newViewValue.HasValue)
             {
                 int newMode = Mathf.Clamp(Mathf.RoundToInt(newViewValue.Value * 3f), 0, 3);
