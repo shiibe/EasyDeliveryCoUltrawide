@@ -16,7 +16,7 @@
     ·
     <a href="#configuration">Configuration</a>
     ·
-    <a href="#fov-menu">FOV Menu</a>
+    <a href="#in-game-menu">In-Game Menu</a>
     ·
     <a href="#build">Build</a>
   </p>
@@ -46,7 +46,10 @@ This is a BepInEx + Harmony mod that patches Easy Delivery Co's camera and UI sy
 - Optional aspect ratio override for gameplay + menu cameras
 - Overlay fixes (menus, pause, transitions) scaled to full width
 - HUD scaling and positioning fixes (toggleable)
-- In-game FOV menu via `wide.exe` in the main menu with separate `1st Per.` / `3rd Per.` sliders (max 110)
+- In-game settings menu via `wide.exe` in the main menu
+  - Separate `1st Per.` / `3rd Per.` FOV sliders (max 110)
+  - `Pixelation` slider for the 3D view (None/Finer/Fine/Default/Large)
+  - `View Distance` slider (Near/Default/Far/Max)
 - Automatically skips FOV overrides while inside buildings
 
 ## Installation
@@ -63,12 +66,13 @@ Install
 - `enable_hud_fix`: enable/disable HUD scaling and positioning fixes
 - `aspect_ratio`: `auto` (display), `window`, `21:9`, `32:9`, `2.39`
 
-## FOV Menu
+## In-Game Menu
 - Click `wide.exe` in the main menu to access the settings
-- Separate saved values for `1st Per.` and `3rd Per.`
+- FOV: separate saved values for `1st Per.` and `3rd Per.`
+- Pixelation: adjusts the 3D view render target (does not affect HUD/menu rendering)
+- View Distance: adjusts gameplay camera draw distance + LOD/shadow distance
 - Saved in PlayerPrefs (not the BepInEx config)
-- FOV overrides are skipped while inside buildings
 
 ## Build
 - Build: `dotnet build EasyDeliveryCoUltrawide/EasyDeliveryCoUltrawide.csproj -c Release`
-- Package: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package.ps1 -Version 1.1.0`
+- Package: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package.ps1 -Version 1.1.1`

@@ -1,3 +1,12 @@
+## 1.1.1
+- Add `Pixelation` slider to `wide.exe` menu (None/Finer/Fine/Default/Large).
+- Add `View Distance` slider to `wide.exe` menu (Near/Default/Far/Max).
+- Apply view distance changes to gameplay camera far clip + quality LOD/shadow distance.
+- Add config options to control `wide.exe` icon visibility/position on the main menu desktop.
+- Split performance logging into a separate toggle (`perf_logging`).
+- Re-categorize config options for easier navigation.
+- Misc internal cleanup.
+
 ## 1.1.0
 - Add in-game mod menu (`wide.exe`) for configuring in-game options.
 - Add separate FOV sliders for `1st Per.` and `3rd Per.` (max 110).
