@@ -1,12 +1,9 @@
-using BepInEx;
-using BepInEx.Configuration;
-using BepInEx.Logging;
 using HarmonyLib;
 using UnityEngine;
 
 namespace EasyDeliveryCoUltrawide
 {
-    public partial class Plugin : BaseUnityPlugin
+    public partial class Plugin
     {
         private void Awake()
         {

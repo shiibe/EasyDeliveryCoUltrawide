@@ -18,14 +18,11 @@ namespace EasyDeliveryCoUltrawide
                 return;
             }
 
-            if (_util == null)
-            {
-                _util = new UIUtil();
-            }
-
+            _util ??= new UIUtil();
+            
             _util.M = view.M;
             _util.R = view.R;
-            _util.nav = view.M.nav;
+            _util.Nav = view.M.nav;
 
             Rect p = new Rect(view.position * 8f, view.size * 8f);
             p.position += new Vector2(8f, 8f);
@@ -40,14 +37,14 @@ namespace EasyDeliveryCoUltrawide
                 _util.M.mouse.y = _mouseYLock;
             }
 
-            DrawMenu(p, view);
+            DrawMenu(p);
         }
 
         public void BackButtonPressed()
         {
         }
 
-        private void DrawMenu(Rect p, DesktopDotExe.WindowView view)
+        private void DrawMenu(Rect p)
         {
             float center = p.x + p.width / 2f - 16f;
             float y = p.y + 10f;

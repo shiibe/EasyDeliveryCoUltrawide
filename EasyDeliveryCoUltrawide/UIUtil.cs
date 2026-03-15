@@ -5,20 +5,20 @@ namespace EasyDeliveryCoUltrawide
     public class UIUtil
     {
         public DesktopDotExe M;
-        public GamepadNavigation nav;
+        public GamepadNavigation Nav;
         public MiniRenderer R;
 
         public void Label(string name, float x, float y)
         {
             name = LocalizationDictionary.Translate(name);
             R.fontOptions.alignment = sFancyText.FontOptions.Alignment.center;
-            R.fput(name, x, y, 0f, 13f, 0f, -1);
+            R.fput(name, x, y);
         }
 
         public void ValueLabel(string value, float x, float y)
         {
             R.fontOptions.alignment = sFancyText.FontOptions.Alignment.right;
-            R.fput(value, x, y, 0f, 13f, 0f, -1);
+            R.fput(value, x, y);
         }
 
         public bool Button(string name, float x, float y)
@@ -38,7 +38,7 @@ namespace EasyDeliveryCoUltrawide
                 }
             }
             R.fontOptions.alignment = sFancyText.FontOptions.Alignment.right;
-            R.fput(name, x - 4f, y, 0f, 13f, 0f, -1);
+            R.fput(name, x - 4f, y);
             return false;
         }
 
@@ -62,7 +62,7 @@ namespace EasyDeliveryCoUltrawide
                 }
             }
             R.fontOptions.alignment = sFancyText.FontOptions.Alignment.right;
-            R.fput(name, x - 4f, y, 0f, 13f, 0f, -1);
+            R.fput(name, x - 4f, y);
             return result;
         }
 
@@ -81,11 +81,11 @@ namespace EasyDeliveryCoUltrawide
             {
                 M.mouseIcon = 128;
                 name = ">" + name;
-                if (nav is GamepadNavigation navigation && navigation.menuInput.x < 0f)
+                if (Nav is not null && Nav.menuInput.x < 0f)
                 {
                     result = Mathf.Clamp01(value - Time.unscaledDeltaTime / 2f);
                 }
-                if (nav is GamepadNavigation navigation2 && navigation2.menuInput.x > 0f)
+                if (Nav is not null && Nav.menuInput.x > 0f)
                 {
                     result = Mathf.Clamp01(value + Time.unscaledDeltaTime / 2f);
                 }
@@ -102,7 +102,7 @@ namespace EasyDeliveryCoUltrawide
                 }
             }
             R.fontOptions.alignment = sFancyText.FontOptions.Alignment.right;
-            R.fput(name, x - 4f, y, 0f, 13f, 0f, -1);
+            R.fput(name, x - 4f, y);
             return result;
         }
     }

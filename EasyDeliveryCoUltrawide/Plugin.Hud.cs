@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Reflection;
-using BepInEx.Configuration;
 using HarmonyLib;
 using UnityEngine;
 
@@ -355,7 +353,7 @@ namespace EasyDeliveryCoUltrawide
                 return;
             }
 
-            var rt = fields.Width != null ? GetRendererTexture(renderer) : null;
+            var rt = GetRendererTexture(renderer);
             foreach (var meshRenderer in meshRenderers)
             {
                 if (meshRenderer == null)
