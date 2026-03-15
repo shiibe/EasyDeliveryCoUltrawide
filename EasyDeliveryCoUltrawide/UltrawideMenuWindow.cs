@@ -84,6 +84,34 @@ namespace EasyDeliveryCoUltrawide
                 Plugin.SaveFovOverride(firstPerson: true, fov: newFov);
             }
 
+            y += line + 4f;
+
+            _util.Label("Pixelation", p.x + p.width / 2f, y);
+            y += line;
+
+            int pixelMode = Plugin.GetPixelationMode();
+            string pixelLabel = pixelMode switch
+            {
+                0 => "None",
+                1 => "Finer",
+                2 => "Fine",
+                3 => "Default",
+                4 => "Large",
+                _ => "Default"
+            };
+            _util.ValueLabel(pixelLabel, p.x + p.width - 12f, y);
+
+            float pixelValue = Mathf.Clamp01(pixelMode / 4f);
+            float? newPixelValue = _util.Slider("Pixelation", pixelValue, center, y, ref _mouseYLock);
+            if (newPixelValue.HasValue)
+            {
+                int newMode = Mathf.Clamp(Mathf.RoundToInt(newPixelValue.Value * 4f), 0, 4);
+                if (newMode != pixelMode)
+                {
+                    Plugin.SavePixelationMode(newMode);
+                }
+            }
+
         }
 
         private static float GetCurrentCameraFov()

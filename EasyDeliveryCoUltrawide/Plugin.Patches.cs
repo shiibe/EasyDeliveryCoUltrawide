@@ -249,6 +249,7 @@ namespace EasyDeliveryCoUltrawide
             menuCamera = ResolveMenuCamera(menuCamera);
             ScaleBackdropFromField(__instance, "backdrop", menuCamera, "ScreenSystem");
             ScaleOverlaySprites(__instance as Component, menuCamera, "ScreenSystem");
+            RefreshPixelation();
         }
 
         private static void ScreenSystem_DoTransition_Postfix(object __instance)
@@ -263,6 +264,7 @@ namespace EasyDeliveryCoUltrawide
             menuCamera = ResolveMenuCamera(menuCamera);
             ScaleBackdropFromField(__instance, "backdrop", menuCamera, "ScreenSystem");
             ScaleOverlaySprites(__instance as Component, menuCamera, "ScreenSystem");
+            RefreshPixelation();
         }
 
         private static void IntroDotExe_Setup_Postfix(object __instance)

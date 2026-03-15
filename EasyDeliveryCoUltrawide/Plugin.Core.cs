@@ -13,6 +13,8 @@ namespace EasyDeliveryCoUltrawide
         private const string PrefKeyFovLegacy = "UltrawideFovOverride";
         internal const string PrefKeyFovThirdPerson = "UltrawideFovOverride_ThirdPerson";
         internal const string PrefKeyFovFirstPerson = "UltrawideFovOverride_FirstPerson";
+        internal const string PrefKeyPixelationMode = "UltrawidePixelationMode";
+        private const string PrefKeyPixelationModeVersion = "UltrawidePixelationModeVersion";
         private const float DefaultAspect = 16f / 9f;
 
         private static ConfigEntry<bool> _enableMod;
@@ -38,6 +40,8 @@ namespace EasyDeliveryCoUltrawide
         private static readonly int MainTexId = Shader.PropertyToID("_MainTex");
         private static readonly int AlphaTexId = Shader.PropertyToID("_AlphaTex");
         private static float _perfLastLogTime;
+
+        private static int _pixelationMode = -1;
 
         private static bool _insideLookupInit;
         private static Type _ambianceType;
@@ -124,6 +128,76 @@ namespace EasyDeliveryCoUltrawide
             if (TryGetSavedFov(IsFirstPersonViewActive(), out float savedFov))
             {
                 ApplyFovOverride(savedFov);
+            }
+
+            GetPixelationMode();
+            RefreshPixelation();
+        }
+
+        internal static int GetPixelationMode()
+        {
+            if (_pixelationMode >= 0)
+            {
+                return _pixelationMode;
+            }
+
+            int raw = PlayerPrefs.GetInt(PrefKeyPixelationMode, 3);
+            int version = PlayerPrefs.GetInt(PrefKeyPixelationModeVersion, 1);
+
+            // v1 mapping: 0 Disable, 1 Fine, 2 Default, 3 Large
+            // v2 mapping: 0 None, 1 Finer, 2 Fine, 3 Default, 4 Large
+            if (version < 2 && PlayerPrefs.HasKey(PrefKeyPixelationMode))
+            {
+                int migrated = raw;
+                switch (raw)
+                {
+                    case 0:
+                        migrated = 0;
+                        break;
+                    case 1:
+                        migrated = 2;
+                        break;
+                    case 2:
+                        migrated = 3;
+                        break;
+                    case 3:
+                        migrated = 4;
+                        break;
+                }
+                raw = migrated;
+                PlayerPrefs.SetInt(PrefKeyPixelationModeVersion, 2);
+                PlayerPrefs.SetInt(PrefKeyPixelationMode, raw);
+            }
+
+            _pixelationMode = Mathf.Clamp(raw, 0, 4);
+            return _pixelationMode;
+        }
+
+        internal static void SavePixelationMode(int mode)
+        {
+            mode = Mathf.Clamp(mode, 0, 4);
+            _pixelationMode = mode;
+            PlayerPrefs.SetInt(PrefKeyPixelationModeVersion, 2);
+            PlayerPrefs.SetInt(PrefKeyPixelationMode, mode);
+            RefreshPixelation();
+        }
+
+        internal static int GetPixelationDivisor()
+        {
+            switch (GetPixelationMode())
+            {
+                case 0:
+                    return 1;
+                case 1:
+                    return 2;
+                case 2:
+                    return 3;
+                case 3:
+                    return 4;
+                case 4:
+                    return 5;
+                default:
+                    return 3;
             }
         }
 
