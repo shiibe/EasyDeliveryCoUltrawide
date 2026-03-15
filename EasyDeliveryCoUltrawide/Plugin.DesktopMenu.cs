@@ -1,10 +1,34 @@
 using System;
+using System.Globalization;
 using UnityEngine;
 
 namespace EasyDeliveryCoUltrawide
 {
     public partial class Plugin
     {
+        private static float ParseDesktopIconFloat(string value, float fallback, string label)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return fallback;
+            }
+
+            string trimmed = value.Trim();
+
+            if (float.TryParse(trimmed, NumberStyles.Float, CultureInfo.InvariantCulture, out float parsed))
+            {
+                return parsed;
+            }
+
+            if (float.TryParse(trimmed, out parsed))
+            {
+                return parsed;
+            }
+
+            LogDebug($"Failed to parse {label}='{value}', using {fallback:0.###}.");
+            return fallback;
+        }
+
         private static void DesktopDotExe_Setup_Postfix(object __instance)
         {
             if (__instance == null)
@@ -17,6 +41,11 @@ namespace EasyDeliveryCoUltrawide
             {
                 return;
             }
+
+            bool visible = _desktopMenuIconVisible == null || _desktopMenuIconVisible.Value;
+            float x = ParseDesktopIconFloat(_desktopMenuIconX != null ? _desktopMenuIconX.Value : null, 5.5f, "ultrawide_menu_icon_x");
+            float y = ParseDesktopIconFloat(_desktopMenuIconY != null ? _desktopMenuIconY.Value : null, 3.25f, "ultrawide_menu_icon_y");
+            var position = new Vector2(x, y);
 
             DesktopDotExe.File existingFile = null;
             foreach (var file in desktop.files)
@@ -37,8 +66,8 @@ namespace EasyDeliveryCoUltrawide
                     data = UltrawideMenuWindow.ListenerData,
                     icon = 7,
                     iconHover = 7,
-                    position = new Vector2(5.5f, 3.25f),
-                    visible = true,
+                    position = position,
+                    visible = visible,
                     cantFolder = false
                 };
                 desktop.files.Add(file);
@@ -47,7 +76,8 @@ namespace EasyDeliveryCoUltrawide
             {
                 existingFile.icon = 7;
                 existingFile.iconHover = 7;
-                existingFile.position = new Vector2(5.5f, 3.25f);
+                existingFile.position = position;
+                existingFile.visible = visible;
             }
 
             var root = desktop.transform;

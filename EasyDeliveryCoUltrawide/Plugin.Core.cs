@@ -18,7 +18,13 @@ namespace EasyDeliveryCoUltrawide
         private static ConfigEntry<bool> _enableMod;
         private static ConfigEntry<bool> _enableHudFix;
         private static ConfigEntry<bool> _debugMode;
+        private static ConfigEntry<bool> _perfLogging;
+        private static ConfigEntry<float> _perfLogIntervalSeconds;
         private static ConfigEntry<string> _aspectRatio;
+
+        private static ConfigEntry<bool> _desktopMenuIconVisible;
+        private static ConfigEntry<string> _desktopMenuIconX;
+        private static ConfigEntry<string> _desktopMenuIconY;
 
         private static ManualLogSource _log;
         private static readonly Dictionary<int, Vector2> OverlayTargetSizes = new Dictionary<int, Vector2>();

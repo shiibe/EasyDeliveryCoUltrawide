@@ -16,7 +16,12 @@ namespace EasyDeliveryCoUltrawide
 
         private static void PerfCount(string key)
         {
-            if (_debugMode == null || !_debugMode.Value)
+            if (_perfLogging == null || !_perfLogging.Value)
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(key))
             {
                 return;
             }
@@ -37,14 +42,22 @@ namespace EasyDeliveryCoUltrawide
                 return;
             }
 
-            if (now - _perfLastLogTime < 2f)
+            float interval = 2f;
+            if (_perfLogIntervalSeconds != null)
+            {
+                interval = Mathf.Max(0.25f, _perfLogIntervalSeconds.Value);
+            }
+
+            if (now - _perfLastLogTime < interval)
             {
                 return;
             }
 
+            float elapsed = Mathf.Max(0.0001f, now - _perfLastLogTime);
+
             foreach (var entry in PerfCounts)
             {
-                _log.LogInfo($"Perf [{entry.Key}] calls in 2s: {entry.Value}.");
+                _log.LogInfo($"Perf [{entry.Key}] calls in {elapsed:0.##}s: {entry.Value}.");
             }
 
             PerfCounts.Clear();
