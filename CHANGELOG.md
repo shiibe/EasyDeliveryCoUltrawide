@@ -1,3 +1,10 @@
+## 1.1.0
+- Add in-game mod menu (`wide.exe`) for configuring in-game options.
+- Add separate FOV sliders for `1st Per.` and `3rd Per.` (max 110).
+- Skip FOV overrides while inside buildings.
+- Fix camera stretch in `CamDotExe`.
+- Internal refactor/split `Plugin.cs` into partials.
+
 ## 1.0.6
 - Refresh README screenshots.
 
