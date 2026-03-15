@@ -7,6 +7,6 @@ namespace EasyDeliveryCoUltrawide
     {
         public const string PluginGuid = "shibe.easydeliveryco.ultrawide";
         public const string PluginName = "Ultrawide Mod";
-        public const string PluginVersion = "1.1.1";
+        public const string PluginVersion = "1.1.2";
     }
 }

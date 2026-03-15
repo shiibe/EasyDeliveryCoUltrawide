@@ -1,3 +1,6 @@
+## 1.1.2
+- Clean up in-game settings menu labels (rename `Pixelation` header to `Renderer`; put `View Distance` label on the slider).
+
 ## 1.1.1
 - Add `Pixelation` slider to `wide.exe` menu (None/Finer/Fine/Default/Large).
 - Add `View Distance` slider to `wide.exe` menu (Near/Default/Far/Max).

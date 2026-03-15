@@ -15,6 +15,8 @@ $zipRoot = Join-Path $repoRoot "dist"
 $manifestPath = Join-Path $repoRoot "manifest.json"
 $changelogPath = Join-Path $repoRoot "CHANGELOG.md"
 $readmePath = Join-Path $repoRoot "README.md"
+$pluginCsPath = Join-Path $repoRoot "EasyDeliveryCoUltrawide\Plugin.cs"
+$assemblyInfoPath = Join-Path $repoRoot "EasyDeliveryCoUltrawide\Properties\AssemblyInfo.cs"
 $iconPath = Join-Path $repoRoot "assets\icon.png"
 
 if (-not (Test-Path $distRoot))
@@ -29,6 +31,47 @@ Write-Host "Updating manifest version..."
 $manifest = Get-Content $manifestPath -Raw | ConvertFrom-Json
 $manifest.version_number = $Version
 $manifest | ConvertTo-Json -Depth 10 | Set-Content -Path $manifestPath
+
+Write-Host "Updating plugin version constants..."
+if (Test-Path $pluginCsPath)
+{
+    $pluginCs = Get-Content $pluginCsPath -Raw
+    $pluginCsUpdated = $pluginCs -replace 'public\s+const\s+string\s+PluginVersion\s*=\s*"[^"]*"\s*;', "public const string PluginVersion = `"$Version`";"
+    if ($pluginCsUpdated -ne $pluginCs)
+    {
+        Set-Content -Path $pluginCsPath -Value $pluginCsUpdated
+    }
+    else
+    {
+        Write-Warning "PluginVersion constant not found in $pluginCsPath"
+    }
+}
+else
+{
+    Write-Warning "Missing file: $pluginCsPath"
+}
+
+Write-Host "Updating assembly version attributes..."
+if (Test-Path $assemblyInfoPath)
+{
+    $assemblyInfo = Get-Content $assemblyInfoPath -Raw
+    $assemblyVersion = "$Version.0"
+    $assemblyInfoUpdated = $assemblyInfo
+    $assemblyInfoUpdated = $assemblyInfoUpdated -replace 'AssemblyVersion\("[^"]*"\)', "AssemblyVersion(`"$assemblyVersion`")"
+    $assemblyInfoUpdated = $assemblyInfoUpdated -replace 'AssemblyFileVersion\("[^"]*"\)', "AssemblyFileVersion(`"$assemblyVersion`")"
+    if ($assemblyInfoUpdated -ne $assemblyInfo)
+    {
+        Set-Content -Path $assemblyInfoPath -Value $assemblyInfoUpdated
+    }
+    else
+    {
+        Write-Warning "AssemblyVersion attributes not found in $assemblyInfoPath"
+    }
+}
+else
+{
+    Write-Warning "Missing file: $assemblyInfoPath"
+}
 
 Write-Host "Updating changelog version header..."
 $changelog = Get-Content $changelogPath -Raw
