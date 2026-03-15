@@ -10,10 +10,11 @@ namespace EasyDeliveryCoUltrawide
             _log = Logger;
             _enableMod = Config.Bind("General", "enable_mod", true, "Enable ultrawide fixes.");
             _aspectRatio = Config.Bind("General", "aspect_ratio", "auto", "Aspect ratio override. Examples: auto (display), window, 21:9, 32:9, 2.39.");
-            _debugMode = Config.Bind("General", "debug_logging", false, "Log debug information about applied adjustments.");
-            _perfLogging = Config.Bind("General", "perf_logging", false, "Log periodic performance counters (can be noisy).");
-            _perfLogIntervalSeconds = Config.Bind("General", "perf_log_interval_seconds", 10f, "How often to emit perf logs, in seconds.");
-            _enableHudFix = Config.Bind("HUD", "enable_hud_fix", true, "Enable HUD scaling and positioning fixes.");
+            _enableHudFix = Config.Bind("General", "enable_hud_fix", true, "Enable HUD scaling and positioning fixes.");
+
+            _debugMode = Config.Bind("Logging", "debug_logging", false, "Log debug information about applied adjustments.");
+            _perfLogging = Config.Bind("Logging", "perf_logging", false, "Log periodic performance counters (can be noisy).");
+            _perfLogIntervalSeconds = Config.Bind("Logging", "perf_log_interval_seconds", 10f, "How often to emit perf logs, in seconds.");
 
             _desktopMenuIconVisible = Config.Bind("Menu", "show_ultrawide_menu_icon", true, "Show/hide the Ultrawide Menu icon on the Main Menu.");
             _desktopMenuIconX = Config.Bind("Menu", "ultrawide_menu_icon_x", "5.5", "Main Menu icon X position. Example: 5.5");
