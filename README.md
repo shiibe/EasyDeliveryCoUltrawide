@@ -39,7 +39,6 @@ This is a BepInEx + Harmony mod that patches Easy Delivery Co's camera and UI sy
 ![Screenshot 4](https://raw.githubusercontent.com/shiibe/EasyDeliveryCoUltrawide/refs/heads/main/assets/screenshots/4.jpg)
 ![Screenshot 5](https://raw.githubusercontent.com/shiibe/EasyDeliveryCoUltrawide/refs/heads/main/assets/screenshots/5.jpg)
 ![Screenshot 6](https://raw.githubusercontent.com/shiibe/EasyDeliveryCoUltrawide/refs/heads/main/assets/screenshots/6.jpg)
-![Screenshot 7](https://raw.githubusercontent.com/shiibe/EasyDeliveryCoUltrawide/refs/heads/main/assets/screenshots/7.jpg)
 
 ## Features
 - Full-width gameplay viewport on ultrawide
