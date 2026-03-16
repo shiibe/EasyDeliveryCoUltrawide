@@ -217,9 +217,6 @@ namespace EasyDeliveryCoUltrawide
                     refH = _pixelDefaultRt.height;
                 }
 
-                // The base game assumes the camera render is a fixed reference size (typically 456x256) and
-                // uses that to convert WorldToScreenPoint into HUD (MiniRenderer) space.
-                // When pixelation changes the camera RT size, we scale back into the reference space.
                 float x = p.x * (refW / srcW);
                 float y = p.y * (refH / srcH);
                 y = refH - y;
@@ -235,7 +232,6 @@ namespace EasyDeliveryCoUltrawide
                 float outX = x + hudW * 0.5f;
                 float outY = y + hudH * 0.5f;
 
-                // Snap to HUD pixel grid to reduce shimmer.
                 __result = new Vector2(Mathf.Round(outX), Mathf.Round(outY));
                 return false;
             }
