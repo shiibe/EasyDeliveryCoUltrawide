@@ -50,18 +50,6 @@
         </Reference>
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="dump\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <EmbeddedResource Remove="dump\**" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="dump\**" />
-    </ItemGroup>
-
     <Target Name="CopyToR2ModmanProfile" AfterTargets="Build">
         <MakeDir Directories="$(ProfileDir)\BepInEx\plugins\EasyDeliveryCoUltrawide" />
         <Copy

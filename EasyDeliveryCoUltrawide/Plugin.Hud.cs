@@ -8,6 +8,9 @@ namespace EasyDeliveryCoUltrawide
 {
     public partial class Plugin
     {
+        private static readonly Dictionary<int, Transform> HudDisplayTransforms = new Dictionary<int, Transform>();
+        private static readonly Dictionary<int, int> HudMiniRendererOriginalWidths = new Dictionary<int, int>();
+
         internal static void RefreshHudDisplayScale()
         {
             if (!ShouldApplyHudFix())
@@ -36,6 +39,7 @@ namespace EasyDeliveryCoUltrawide
             EnsureMiniRendererRenderTexture(miniRenderer);
             ApplyHudDisplayScale(miniRenderer);
         }
+
 
         private struct PixelPerfectFields
         {
@@ -98,7 +102,7 @@ namespace EasyDeliveryCoUltrawide
         private static bool PixelPerfectView_AdjustViewPlane_Prefix(object __instance)
         {
             PerfCount("pixelPerfectView.AdjustViewPlane");
-            if (!ShouldApply())
+            if (!ShouldApply() || IsVanillaPresentation())
             {
                 return true;
             }
@@ -211,10 +215,21 @@ namespace EasyDeliveryCoUltrawide
 
                 float refW = srcW;
                 float refH = srcH;
+
                 if (_pixelDefaultRt != null && _pixelDefaultRt.width > 0 && _pixelDefaultRt.height > 0)
                 {
                     refW = _pixelDefaultRt.width;
                     refH = _pixelDefaultRt.height;
+                }
+                else
+                {
+                    refW = 456f;
+                    refH = 256f;
+                }
+
+                if (Mathf.Abs(srcW - refW) < 0.5f && Mathf.Abs(srcH - refH) < 0.5f)
+                {
+                    return true;
                 }
 
                 float x = p.x * (refW / srcW);
@@ -555,6 +570,12 @@ namespace EasyDeliveryCoUltrawide
                 return;
             }
 
+            int rendererId = miniRenderer.GetInstanceID();
+            if (!HudMiniRendererOriginalWidths.ContainsKey(rendererId))
+            {
+                HudMiniRendererOriginalWidths[rendererId] = width;
+            }
+
             int targetWidth = Mathf.Clamp(Mathf.RoundToInt(height * windowAspect), 1, 8192);
             if (width == targetWidth)
             {
@@ -638,6 +659,7 @@ namespace EasyDeliveryCoUltrawide
                 {
                     baseScale = transform.localScale;
                     HudDisplayOriginalScales[id] = baseScale;
+                    HudDisplayTransforms[id] = transform;
                 }
 
                 float windowAspect = GetWindowAspect();

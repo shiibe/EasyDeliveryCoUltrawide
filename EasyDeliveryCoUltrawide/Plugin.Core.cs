@@ -20,7 +20,6 @@ namespace EasyDeliveryCoUltrawide
         private const float DefaultAspect = 16f / 9f;
 
         private static ConfigEntry<bool> _enableMod;
-        private static ConfigEntry<bool> _enableHudFix;
         private static ConfigEntry<bool> _debugMode;
         private static ConfigEntry<bool> _perfLogging;
         private static ConfigEntry<float> _perfLogIntervalSeconds;
@@ -58,7 +57,14 @@ namespace EasyDeliveryCoUltrawide
 
         private static bool ShouldApplyHudFix()
         {
-            return ShouldApply() && _enableHudFix != null && _enableHudFix.Value;
+            return ShouldApply() && IsUltrawide();
+        }
+
+        private static bool IsVanillaPresentation()
+        {
+            string raw = _aspectRatio != null ? _aspectRatio.Value : "auto";
+            string normalized = string.IsNullOrWhiteSpace(raw) ? "" : raw.Trim().ToLowerInvariant();
+            return normalized == "default" || normalized == "native" || normalized == "vanilla";
         }
 
         internal static bool GetEnableMod()
@@ -76,21 +82,6 @@ namespace EasyDeliveryCoUltrawide
             _enableMod.Value = value;
         }
 
-        internal static bool GetEnableHudFix()
-        {
-            return _enableHudFix != null && _enableHudFix.Value;
-        }
-
-        internal static void SetEnableHudFix(bool value)
-        {
-            if (_enableHudFix == null)
-            {
-                return;
-            }
-
-            _enableHudFix.Value = value;
-        }
-
         internal static bool GetDebugMode()
         {
             return _debugMode != null && _debugMode.Value;
@@ -106,20 +97,6 @@ namespace EasyDeliveryCoUltrawide
             _debugMode.Value = value;
         }
 
-        internal static string GetAspectRatioValue()
-        {
-            return _aspectRatio != null ? _aspectRatio.Value : "auto";
-        }
-
-        internal static void SetAspectRatioValue(string value)
-        {
-            if (_aspectRatio == null)
-            {
-                return;
-            }
-
-            _aspectRatio.Value = value ?? "auto";
-        }
 
         internal static void ApplySavedMenuSettings()
         {
@@ -361,12 +338,7 @@ namespace EasyDeliveryCoUltrawide
 
         private static float GetTargetAspect()
         {
-            if (_aspectRatio == null)
-            {
-                return GetDisplayAspect();
-            }
-
-            string raw = _aspectRatio.Value;
+            string raw = _aspectRatio != null ? _aspectRatio.Value : "auto";
             string normalized = string.IsNullOrWhiteSpace(raw) ? "" : raw.Trim().ToLowerInvariant();
             if (normalized == "auto" || normalized == "match")
             {
@@ -374,7 +346,7 @@ namespace EasyDeliveryCoUltrawide
                 return Mathf.Round(window * 100f) / 100f;
             }
 
-            if (!TryParseAspect(_aspectRatio.Value, out float aspect, out bool useWindow))
+            if (!TryParseAspect(raw, out float aspect, out bool useWindow))
             {
                 return GetDisplayAspect();
             }
@@ -461,6 +433,11 @@ namespace EasyDeliveryCoUltrawide
 
         private static bool IsUltrawide()
         {
+            if (IsVanillaPresentation())
+            {
+                return false;
+            }
+
             return GetWindowAspect() > DefaultAspect + 0.01f;
         }
 
@@ -472,6 +449,11 @@ namespace EasyDeliveryCoUltrawide
         private static bool ShouldForceViewport(Camera camera, Rect rect)
         {
             if (!ShouldApply() || !IsUltrawide())
+            {
+                return false;
+            }
+
+            if (GetTargetAspect() <= DefaultAspect + 0.01f)
             {
                 return false;
             }

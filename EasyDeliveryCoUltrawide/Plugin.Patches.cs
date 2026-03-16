@@ -8,9 +8,21 @@ namespace EasyDeliveryCoUltrawide
         private void Awake()
         {
             _log = Logger;
-            _enableMod = Config.Bind("General", "enable_mod", true, "Enable ultrawide fixes.");
-            _aspectRatio = Config.Bind("General", "aspect_ratio", "auto", "Aspect ratio override. Examples: auto (display), window, 21:9, 32:9, 2.39.");
-            _enableHudFix = Config.Bind("General", "enable_hud_fix", true, "Enable HUD scaling and positioning fixes.");
+            _enableMod = Config.Bind("General", "enable_mod", true, "Enables/disables the mod entirely.");
+            _aspectRatio = Config.Bind(
+                "General",
+                "aspect_ratio",
+                "auto",
+                "Aspect ratio override.\n\n" +
+                "auto    - Automatically uses the current window aspect ratio (recommended).\n" +
+                "default - Use the game's original behavior (disables ultrawide fixes).\n" +
+                "w:h     - Manual ratio such as 21:9 or 32:9.\n" +
+                "number  - Decimal ratio such as 2.39 or 1.78.\n\n" +
+                "Examples:\n" +
+                "21:9\n" +
+                "32:9\n" +
+                "2.39"
+            );
 
             _debugMode = Config.Bind("Logging", "debug_logging", false, "Log debug information about applied adjustments.");
             _perfLogging = Config.Bind("Logging", "perf_logging", false, "Log periodic performance counters (can be noisy).");

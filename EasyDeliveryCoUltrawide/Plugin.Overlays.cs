@@ -1,12 +1,21 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace EasyDeliveryCoUltrawide
 {
     public partial class Plugin
     {
+        private static readonly Dictionary<int, Transform> OverlayTransforms = new Dictionary<int, Transform>();
+        private static readonly Dictionary<int, Vector3> OverlayOriginalScales = new Dictionary<int, Vector3>();
+
         internal static void RefreshHudBackdrop()
         {
+            if (!ShouldApply() || !IsUltrawide())
+            {
+                return;
+            }
+
             var hudType = HarmonyLib.AccessTools.TypeByName("sHUD");
             if (hudType == null)
             {
@@ -24,7 +33,7 @@ namespace EasyDeliveryCoUltrawide
 
         private static void ScaleOverlayBackdrops()
         {
-            if (!ShouldApply())
+            if (!ShouldApply() || !IsUltrawide())
             {
                 return;
             }
@@ -149,6 +158,11 @@ namespace EasyDeliveryCoUltrawide
                 return;
             }
 
+            if (!ShouldApply() || !IsUltrawide())
+            {
+                return;
+            }
+
             Camera cam = fallbackCamera;
             if (cam == null)
             {
@@ -168,11 +182,18 @@ namespace EasyDeliveryCoUltrawide
             }
 
             Vector3 scale = spriteRenderer.transform.localScale;
+            int tid = spriteRenderer.transform.GetInstanceID();
+            if (!OverlayOriginalScales.ContainsKey(tid))
+            {
+                OverlayOriginalScales[tid] = scale;
+                OverlayTransforms[tid] = spriteRenderer.transform;
+            }
             scale.x = targetSize.x / spriteSize.x;
             scale.y = targetSize.y / spriteSize.y;
             spriteRenderer.transform.localScale = scale;
             LogOverlayScale(spriteRenderer, targetSize, cam, label);
         }
+
 
         private static Vector2 GetCameraWorldSize(Camera cam, Vector3 worldPosition)
         {

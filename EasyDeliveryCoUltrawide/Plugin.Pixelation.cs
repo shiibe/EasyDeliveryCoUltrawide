@@ -149,8 +149,7 @@ namespace EasyDeliveryCoUltrawide
                 return;
             }
 
-            int fullW = GetFullWidth();
-            int fullH = GetFullHeight();
+            GetMaxRtSizeForCurrentPresentation(out int fullW, out int fullH);
 
             int targetW;
             int targetH;
@@ -213,8 +212,8 @@ namespace EasyDeliveryCoUltrawide
                 return;
             }
 
-            int fullW = GetFullWidth();
-            int fullH = GetFullHeight();
+            int fullW = GetFullWidth(_pixelRearCamera, _pixelDefaultRearRt);
+            int fullH = GetFullHeight(_pixelRearCamera, _pixelDefaultRearRt);
 
             int baseW = _pixelDefaultRearRt.width;
             int baseH = _pixelDefaultRearRt.height;
@@ -268,6 +267,81 @@ namespace EasyDeliveryCoUltrawide
         private static int GetFullHeight()
         {
             return Mathf.Max(1, Screen.height > 0 ? Screen.height : Screen.currentResolution.height);
+        }
+
+        private static int GetFullWidth(Camera cam, RenderTexture fallback)
+        {
+            if (cam != null && cam.pixelWidth > 0)
+            {
+                return cam.pixelWidth;
+            }
+
+            if (fallback != null && fallback.width > 0)
+            {
+                return fallback.width;
+            }
+
+            return GetFullWidth();
+        }
+
+        private static int GetFullHeight(Camera cam, RenderTexture fallback)
+        {
+            if (cam != null && cam.pixelHeight > 0)
+            {
+                return cam.pixelHeight;
+            }
+
+            if (fallback != null && fallback.height > 0)
+            {
+                return fallback.height;
+            }
+
+            return GetFullHeight();
+        }
+
+        private static void GetMaxRtSizeForCurrentPresentation(out int width, out int height)
+        {
+            int screenW = GetFullWidth();
+            int screenH = GetFullHeight();
+            width = screenW;
+            height = screenH;
+
+            float targetAspect = GetPixelationOutputAspect();
+            if (screenW <= 0 || screenH <= 0 || targetAspect <= 0.01f)
+            {
+                return;
+            }
+
+            float screenAspect = screenW / (float)screenH;
+            if (screenAspect >= targetAspect)
+            {
+                height = screenH;
+                width = Mathf.Max(1, Mathf.RoundToInt(height * targetAspect));
+            }
+            else
+            {
+                width = screenW;
+                height = Mathf.Max(1, Mathf.RoundToInt(width / targetAspect));
+            }
+
+            width = Mathf.Clamp(width, 1, 16384);
+            height = Mathf.Clamp(height, 1, 16384);
+        }
+
+        private static float GetPixelationOutputAspect()
+        {
+            if (IsVanillaPresentation())
+            {
+                return DefaultAspect;
+            }
+
+            float a = GetTargetAspect();
+            if (a > 0.01f)
+            {
+                return a;
+            }
+
+            return GetWindowAspect();
         }
 
         private static void SetMainTexture(MeshRenderer renderer, Texture tex)

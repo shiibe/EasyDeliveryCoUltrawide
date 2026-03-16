@@ -50,7 +50,7 @@ namespace EasyDeliveryCoUltrawide
             float y = p.y + 10f;
             float line = 12f;
 
-            _util.Label("Ultrawide Mod", p.x + p.width / 2f, y);
+            _util.Label("Ultrawide Settings", p.x + p.width / 2f, y);
             y += line + 4f;
 
             _util.Label("FOV", p.x + p.width / 2f, y);
