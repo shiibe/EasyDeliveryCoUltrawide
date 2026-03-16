@@ -366,6 +366,14 @@ namespace EasyDeliveryCoUltrawide
                 return GetDisplayAspect();
             }
 
+            string raw = _aspectRatio.Value;
+            string normalized = string.IsNullOrWhiteSpace(raw) ? "" : raw.Trim().ToLowerInvariant();
+            if (normalized == "auto" || normalized == "match")
+            {
+                float window = GetWindowAspect();
+                return Mathf.Round(window * 100f) / 100f;
+            }
+
             if (!TryParseAspect(_aspectRatio.Value, out float aspect, out bool useWindow))
             {
                 return GetDisplayAspect();
