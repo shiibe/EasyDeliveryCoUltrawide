@@ -8,9 +8,9 @@
     <br />
     <a href="#about">About</a>
     ·
-    <a href="#screenshots">Screenshots</a>
-    ·
     <a href="#features">Features</a>
+    ·
+    <a href="#screenshots">Screenshots</a>
     ·
     <a href="#installation">Installation</a>
     ·
