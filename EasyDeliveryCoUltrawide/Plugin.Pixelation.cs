@@ -169,8 +169,8 @@ namespace EasyDeliveryCoUltrawide
                     targetH = Mathf.Min(fullH, Mathf.Max(1, Mathf.RoundToInt(_pixelDefaultRt.height * 1.5f)));
                     break;
                 case 4:
-                    targetW = Mathf.Max(1, Mathf.RoundToInt(_pixelDefaultRt.width * 0.25f));
-                    targetH = Mathf.Max(1, Mathf.RoundToInt(_pixelDefaultRt.height * 0.25f));
+                    targetW = Mathf.Max(1, Mathf.RoundToInt(_pixelDefaultRt.width * 0.75f));
+                    targetH = Mathf.Max(1, Mathf.RoundToInt(_pixelDefaultRt.height * 0.75f));
                     break;
                 default:
                     targetW = _pixelDefaultRt.width;
@@ -236,8 +236,8 @@ namespace EasyDeliveryCoUltrawide
                     targetH = Mathf.Min(fullH, Mathf.Max(1, Mathf.RoundToInt(baseH * 1.5f)));
                     break;
                 case 4:
-                    targetW = Mathf.Max(1, Mathf.RoundToInt(baseW * 0.25f));
-                    targetH = Mathf.Max(1, Mathf.RoundToInt(baseH * 0.25f));
+                    targetW = Mathf.Max(1, Mathf.RoundToInt(baseW * 0.75f));
+                    targetH = Mathf.Max(1, Mathf.RoundToInt(baseH * 0.75f));
                     break;
                 default:
                     targetW = baseW;

@@ -41,6 +41,7 @@ namespace EasyDeliveryCoUltrawide
             PatchByName(harmony, "MiniRenderer", "Start", postfix: nameof(MiniRenderer_Start_Postfix));
             PatchByName(harmony, "pixelPerfectView", "AdjustViewPlane", prefix: nameof(PixelPerfectView_AdjustViewPlane_Prefix));
             PatchByName(harmony, "sHUD", "Init", postfix: nameof(SHud_Init_Postfix));
+            PatchByName(harmony, "sHUD", "WorldToHUDPoint", prefix: nameof(SHud_WorldToHUDPoint_Prefix));
             PatchByName(harmony, "sHUD", "FadeToBlack", prefix: nameof(SHud_FadeToBlack_Prefix));
             PatchByName(harmony, "sHUD", "DipToBlack", prefix: nameof(SHud_DipToBlack_Prefix));
             PatchByName(harmony, "ScreenSystem", "Init", postfix: nameof(ScreenSystem_Init_Postfix));

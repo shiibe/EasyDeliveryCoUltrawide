@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
@@ -66,6 +67,33 @@ namespace EasyDeliveryCoUltrawide
             public FieldInfo Width;
             public FieldInfo Height;
         }
+
+        private struct SHudWorldToHudPointFields
+        {
+            public FieldInfo Navigation;
+            public FieldInfo R;
+        }
+
+        private struct HudNavigationFields
+        {
+            public FieldInfo Car;
+        }
+
+        private struct HudCarFields
+        {
+            public FieldInfo CarCamera;
+        }
+
+        private struct MiniRendererSizeFields
+        {
+            public FieldInfo Width;
+            public FieldInfo Height;
+        }
+
+        private static readonly Dictionary<Type, SHudWorldToHudPointFields> SHudWorldToHudPointFieldCache = new Dictionary<Type, SHudWorldToHudPointFields>();
+        private static readonly Dictionary<Type, HudNavigationFields> HudNavigationFieldCache = new Dictionary<Type, HudNavigationFields>();
+        private static readonly Dictionary<Type, HudCarFields> HudCarFieldCache = new Dictionary<Type, HudCarFields>();
+        private static readonly Dictionary<Type, MiniRendererSizeFields> MiniRendererSizeFieldCache = new Dictionary<Type, MiniRendererSizeFields>();
 
         private static bool PixelPerfectView_AdjustViewPlane_Prefix(object __instance)
         {
@@ -143,6 +171,242 @@ namespace EasyDeliveryCoUltrawide
             }
             LogPixelPerfectScale(component, aspect, sourceAspect);
             return false;
+        }
+
+        private static bool SHud_WorldToHUDPoint_Prefix(object __instance, Vector3 worldPoint, ref Vector2 __result)
+        {
+            if (!ShouldApply() || __instance == null)
+            {
+                return true;
+            }
+
+            try
+            {
+                if (!TryGetHudCarCamera(__instance, out Camera cam) || cam == null)
+                {
+                    return true;
+                }
+
+                var camTransform = cam.transform;
+                if (camTransform == null)
+                {
+                    return true;
+                }
+
+                if (Vector3.Dot(camTransform.forward, worldPoint - camTransform.position) < 0f)
+                {
+                    __result = new Vector2(-100f, -100f);
+                    return false;
+                }
+
+                Vector3 p = cam.WorldToScreenPoint(worldPoint);
+                p.z = 0f;
+
+                float srcW = GetCameraPixelWidth(cam);
+                float srcH = GetCameraPixelHeight(cam);
+                if (srcW <= 0.01f || srcH <= 0.01f)
+                {
+                    return true;
+                }
+
+                float refW = srcW;
+                float refH = srcH;
+                if (_pixelDefaultRt != null && _pixelDefaultRt.width > 0 && _pixelDefaultRt.height > 0)
+                {
+                    refW = _pixelDefaultRt.width;
+                    refH = _pixelDefaultRt.height;
+                }
+
+                // The base game assumes the camera render is a fixed reference size (typically 456x256) and
+                // uses that to convert WorldToScreenPoint into HUD (MiniRenderer) space.
+                // When pixelation changes the camera RT size, we scale back into the reference space.
+                float x = p.x * (refW / srcW);
+                float y = p.y * (refH / srcH);
+                y = refH - y;
+                x -= refW * 0.5f;
+                y -= refH * 0.5f;
+
+                if (!TryGetHudMiniRendererSize(__instance, out float hudW, out float hudH))
+                {
+                    hudW = srcW;
+                    hudH = srcH;
+                }
+
+                float outX = x + hudW * 0.5f;
+                float outY = y + hudH * 0.5f;
+
+                // Snap to HUD pixel grid to reduce shimmer.
+                __result = new Vector2(Mathf.Round(outX), Mathf.Round(outY));
+                return false;
+            }
+            catch
+            {
+                return true;
+            }
+        }
+
+        private static bool TryGetHudCarCamera(object hudInstance, out Camera cam)
+        {
+            cam = null;
+            if (hudInstance == null)
+            {
+                return false;
+            }
+
+            var hudType = hudInstance.GetType();
+            if (!SHudWorldToHudPointFieldCache.TryGetValue(hudType, out var hudFields))
+            {
+                hudFields = new SHudWorldToHudPointFields
+                {
+                    Navigation = AccessTools.Field(hudType, "navigation"),
+                    R = AccessTools.Field(hudType, "R")
+                };
+                SHudWorldToHudPointFieldCache[hudType] = hudFields;
+            }
+
+            if (hudFields.Navigation == null)
+            {
+                return false;
+            }
+
+            var navigation = hudFields.Navigation.GetValue(hudInstance);
+            if (navigation == null)
+            {
+                return false;
+            }
+
+            var navType = navigation.GetType();
+            if (!HudNavigationFieldCache.TryGetValue(navType, out var navFields))
+            {
+                navFields = new HudNavigationFields
+                {
+                    Car = AccessTools.Field(navType, "car")
+                };
+                HudNavigationFieldCache[navType] = navFields;
+            }
+
+            if (navFields.Car == null)
+            {
+                return false;
+            }
+
+            var car = navFields.Car.GetValue(navigation);
+            if (car == null)
+            {
+                return false;
+            }
+
+            var carType = car.GetType();
+            if (!HudCarFieldCache.TryGetValue(carType, out var carFields))
+            {
+                carFields = new HudCarFields
+                {
+                    CarCamera = AccessTools.Field(carType, "carCamera")
+                };
+                HudCarFieldCache[carType] = carFields;
+            }
+
+            if (carFields.CarCamera == null)
+            {
+                return false;
+            }
+
+            cam = carFields.CarCamera.GetValue(car) as Camera;
+            return cam != null;
+        }
+
+        private static bool TryGetHudMiniRendererSize(object hudInstance, out float width, out float height)
+        {
+            width = 0f;
+            height = 0f;
+            if (hudInstance == null)
+            {
+                return false;
+            }
+
+            var hudType = hudInstance.GetType();
+            if (!SHudWorldToHudPointFieldCache.TryGetValue(hudType, out var hudFields))
+            {
+                hudFields = new SHudWorldToHudPointFields
+                {
+                    Navigation = AccessTools.Field(hudType, "navigation"),
+                    R = AccessTools.Field(hudType, "R")
+                };
+                SHudWorldToHudPointFieldCache[hudType] = hudFields;
+            }
+
+            if (hudFields.R == null)
+            {
+                return false;
+            }
+
+            var miniRenderer = hudFields.R.GetValue(hudInstance);
+            if (miniRenderer == null)
+            {
+                return false;
+            }
+
+            var mrType = miniRenderer.GetType();
+            if (!MiniRendererSizeFieldCache.TryGetValue(mrType, out var fields))
+            {
+                fields = new MiniRendererSizeFields
+                {
+                    Width = AccessTools.Field(mrType, "width"),
+                    Height = AccessTools.Field(mrType, "height")
+                };
+                MiniRendererSizeFieldCache[mrType] = fields;
+            }
+
+            if (fields.Width == null || fields.Height == null)
+            {
+                return false;
+            }
+
+            width = Convert.ToSingle(fields.Width.GetValue(miniRenderer));
+            height = Convert.ToSingle(fields.Height.GetValue(miniRenderer));
+            return width > 0.01f && height > 0.01f;
+        }
+
+        private static float GetCameraPixelWidth(Camera cam)
+        {
+            if (cam == null)
+            {
+                return 0f;
+            }
+
+            var rt = cam.targetTexture;
+            if (rt != null && rt.width > 0)
+            {
+                return rt.width;
+            }
+
+            if (cam.pixelWidth > 0)
+            {
+                return cam.pixelWidth;
+            }
+
+            return Screen.width;
+        }
+
+        private static float GetCameraPixelHeight(Camera cam)
+        {
+            if (cam == null)
+            {
+                return 0f;
+            }
+
+            var rt = cam.targetTexture;
+            if (rt != null && rt.height > 0)
+            {
+                return rt.height;
+            }
+
+            if (cam.pixelHeight > 0)
+            {
+                return cam.pixelHeight;
+            }
+
+            return Screen.height;
         }
 
         private static void MiniRenderer_Start_Postfix(object __instance)
