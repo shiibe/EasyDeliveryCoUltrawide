@@ -4,7 +4,7 @@
   <br>EasyDeliveryCoUltrawide
 </h1>
   <p align="center">
-    Ultrawide monitor support for Easy Delivery Co.
+    Ultrawide fixes + a few extra graphics knobs for Easy Delivery Co.
     <br />
     <a href="#about">About</a>
     ·
@@ -24,13 +24,26 @@
 <hr/>
 
 ## About
-This is a BepInEx + Harmony mod that patches Easy Delivery Co's camera and UI systems to behave better on ultrawide.
+This is a BepInEx + Harmony mod that fixes Easy Delivery Co's ultrawide presentation and adds an in-game settings panel (`wide.exe`).
 
-- Forces primary gameplay cameras to render full-width on ultrawide (and can override camera aspect to a target ratio)
-- Rescales menu/pause/transition overlays so fades/backdrops cover the full screen
-- Patches HUD rendering paths (`pixelPerfectView`/`MiniRenderer`) so UI stays readable instead of stretched
-- Adds a `wide.exe` entry in the main menu that opens an in-game settings window
-- Saves separate 1st/3rd person FOV overrides to PlayerPrefs and applies the correct one at runtime
+Ultrawide behavior is optional: set `aspect_ratio=default` to keep the game's original presentation while still using the extra settings.
+
+- Full-width gameplay viewport on ultrawide (with optional aspect override)
+- Menu/pause/transition overlay scaling so fades/backdrops cover the screen
+- HUD rendering fixes (`pixelPerfectView`/`MiniRenderer`) so UI and world-space labels stay aligned (even with pixelation)
+- In-game settings (`wide.exe`): FOV (1st/3rd person), pixelation, view distance, fog multiplier
+
+## Features
+- Full-width gameplay viewport on ultrawide
+- Optional aspect ratio override for gameplay + menu cameras
+- Overlay fixes (menus, pause, transitions) scaled to full width
+- HUD scaling and positioning fixes
+- In-game settings menu via `wide.exe` in the main menu
+  - Separate `1st Person` / `3rd Person` FOV sliders (max 110)
+  - `Pixelation` slider for the 3D view (None/Finer/Fine/Default/Large)
+  - `View Distance` slider (Near/Default/Far/Max)
+  - `Fog` slider (multiplier)
+- Automatically skips FOV overrides while inside buildings
 
 ## Screenshots
 ![Screenshot 1](https://raw.githubusercontent.com/shiibe/EasyDeliveryCoUltrawide/refs/heads/main/assets/screenshots/1.jpg)
@@ -39,17 +52,6 @@ This is a BepInEx + Harmony mod that patches Easy Delivery Co's camera and UI sy
 ![Screenshot 4](https://raw.githubusercontent.com/shiibe/EasyDeliveryCoUltrawide/refs/heads/main/assets/screenshots/4.jpg)
 ![Screenshot 5](https://raw.githubusercontent.com/shiibe/EasyDeliveryCoUltrawide/refs/heads/main/assets/screenshots/5.jpg)
 ![Screenshot 6](https://raw.githubusercontent.com/shiibe/EasyDeliveryCoUltrawide/refs/heads/main/assets/screenshots/6.jpg)
-
-## Features
-- Full-width gameplay viewport on ultrawide
-- Optional aspect ratio override for gameplay + menu cameras
-- Overlay fixes (menus, pause, transitions) scaled to full width
-- HUD scaling and positioning fixes (toggleable)
-- In-game settings menu via `wide.exe` in the main menu
-  - Separate `1st Per.` / `3rd Per.` FOV sliders (max 110)
-  - `Pixelation` slider for the 3D view (None/Finer/Fine/Default/Large)
-  - `View Distance` slider (Near/Default/Far/Max)
-- Automatically skips FOV overrides while inside buildings
 
 ## Installation
 Dependencies
@@ -61,17 +63,18 @@ Install
 
 ## Configuration
 - Config file: `BepInEx/config/shibe.easydeliveryco.ultrawide.cfg`
-- `enable_mod`: enable/disable the mod
-- `enable_hud_fix`: enable/disable HUD scaling and positioning fixes
-- `aspect_ratio`: `auto` (display), `window`, `21:9`, `32:9`, `2.39`
+- `enable_mod`: enables/disables the mod entirely
+- `aspect_ratio`: `default`, `auto`, `w:h` (e.g. `21:9`), or a decimal ratio (e.g. `2.39`)
+  - Use `aspect_ratio=default` to disable ultrawide fixes while keeping the in-game settings (FOV/pixelation/view distance/fog).
 
 ## In-Game Menu
 - Click `wide.exe` in the main menu to access the settings
-- FOV: separate saved values for `1st Per.` and `3rd Per.`
+- FOV: separate saved values for `1st Person` and `3rd Person`
 - Pixelation: adjusts the 3D view render target (does not affect HUD/menu rendering)
 - View Distance: adjusts gameplay camera draw distance + LOD/shadow distance
+- Fog: multiplies fog density
 - Saved in PlayerPrefs (not the BepInEx config)
 
 ## Build
 - Build: `dotnet build EasyDeliveryCoUltrawide/EasyDeliveryCoUltrawide.csproj -c Release`
-- Package: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package.ps1 -Version 1.1.2`
+- Package: `powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package.ps1 -Version 1.2.0`

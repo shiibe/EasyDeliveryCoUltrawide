@@ -1,3 +1,12 @@
+## 1.2.0
+- Add `default` aspect mode to disable ultrawide fixes (vanilla presentation) while keeping pixelation usable.
+- Improve `aspect_ratio=auto` to use the current window aspect ratio (rounded) to avoid CRT edge smearing.
+- Fix world-space HUD labels (interaction + inventory label) drifting when pixelation changes the render texture size.
+- Tune `Pixelation` Large strength (less aggressive).
+- Increase `View Distance` Max (higher far clip / LOD / shadow distance).
+- Add `Fog` multiplier slider to the in-game menu.
+- Clean up/standardize in-game menu spacing and labels.
+
 ## 1.1.2
 - Clean up in-game settings menu labels (rename `Pixelation` header to `Renderer`; put `View Distance` label on the slider).
 
