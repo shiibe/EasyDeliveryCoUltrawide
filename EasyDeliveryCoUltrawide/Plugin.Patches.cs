@@ -61,6 +61,8 @@ namespace EasyDeliveryCoUltrawide
             PatchByName(harmony, "SceneTransition", "Start", postfix: nameof(SceneTransition_Start_Postfix));
             PatchByName(harmony, "sTeleporter", "Teleport", postfix: nameof(Steleporter_Teleport_Postfix));
             PatchByName(harmony, "DesktopDotExe", "Setup", postfix: nameof(DesktopDotExe_Setup_Postfix));
+            PatchByName(harmony, "sWeatherSystem", "UpdateWeather", postfix: nameof(SWeatherSystem_UpdateWeather_Postfix));
+            PatchByName(harmony, "FogVolume", "LateUpdate", postfix: nameof(FogVolume_LateUpdate_Postfix));
         }
 
         private static bool ShouldOverrideSplitScreen()

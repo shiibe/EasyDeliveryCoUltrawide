@@ -65,8 +65,8 @@ namespace EasyDeliveryCoUltrawide
                     lodBias = 3.0f;
                     break;
                 case 3:
-                    shadowDistance = 2000f;
-                    lodBias = 4.0f;
+                    shadowDistance = 3000f;
+                    lodBias = 6.0f;
                     break;
                 default:
                     shadowDistance = _baseShadowDistance;
@@ -108,7 +108,7 @@ namespace EasyDeliveryCoUltrawide
                     far = 25000f;
                     break;
                 case 3:
-                    far = 50000f;
+                    far = 100000f;
                     break;
                 default:
                     far = 10000f;

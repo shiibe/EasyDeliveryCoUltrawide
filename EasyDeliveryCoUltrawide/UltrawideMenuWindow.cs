@@ -49,9 +49,10 @@ namespace EasyDeliveryCoUltrawide
             float center = p.x + p.width / 2f - 16f;
             float y = p.y + 10f;
             float line = 12f;
+            float sectionGap = 4f;
 
             _util.Label("Ultrawide Settings", p.x + p.width / 2f, y);
-            y += line + 4f;
+            y += line + sectionGap;
 
             _util.Label("FOV", p.x + p.width / 2f, y);
             y += line;
@@ -65,7 +66,7 @@ namespace EasyDeliveryCoUltrawide
             float thirdFov = Mathf.Clamp(Plugin.GetSavedFovOrDefault(firstPerson: false, fallback: currentFov), fovMin, fovMax);
             float thirdValue = Mathf.InverseLerp(fovMin, fovMax, thirdFov);
             _util.ValueLabel($"{thirdFov:0}", p.x + p.width - 12f, y);
-            float? newThirdValue = _util.Slider("3rd Per.", thirdValue, center, y, ref _mouseYLock);
+            float? newThirdValue = _util.Slider("3rd Person", thirdValue, center, y, ref _mouseYLock);
             if (newThirdValue.HasValue)
             {
                 float newFov = Mathf.Lerp(fovMin, fovMax, newThirdValue.Value);
@@ -77,14 +78,14 @@ namespace EasyDeliveryCoUltrawide
             float firstFov = Mathf.Clamp(Plugin.GetSavedFovOrDefault(firstPerson: true, fallback: currentFov), fovMin, fovMax);
             float firstValue = Mathf.InverseLerp(fovMin, fovMax, firstFov);
             _util.ValueLabel($"{firstFov:0}", p.x + p.width - 12f, y);
-            float? newFirstValue = _util.Slider("1st Per.", firstValue, center, y, ref _mouseYLock);
+            float? newFirstValue = _util.Slider("1st Person", firstValue, center, y, ref _mouseYLock);
             if (newFirstValue.HasValue)
             {
                 float newFov = Mathf.Lerp(fovMin, fovMax, newFirstValue.Value);
                 Plugin.SaveFovOverride(firstPerson: true, fov: newFov);
             }
 
-            y += line + 4f;
+            y += line + sectionGap;
 
             _util.Label("Renderer", p.x + p.width / 2f, y);
             y += line;
@@ -112,7 +113,7 @@ namespace EasyDeliveryCoUltrawide
                 }
             }
 
-            y += line + 4f;
+            y += line;
 
             int viewMode = Plugin.GetViewDistanceMode();
             string viewLabel = viewMode switch
@@ -133,6 +134,30 @@ namespace EasyDeliveryCoUltrawide
                 if (newMode != viewMode)
                 {
                     Plugin.SaveViewDistanceMode(newMode);
+                }
+            }
+
+            y += line + sectionGap;
+
+            _util.Label("Atmosphere", p.x + p.width / 2f, y);
+            y += line;
+
+            float fogMult = Plugin.GetFogMultiplier();
+            float fogMin = 0.25f;
+            float fogMax = 2f;
+            fogMult = Mathf.Clamp(fogMult, fogMin, fogMax);
+            int fogPct = Mathf.RoundToInt(fogMult * 100f);
+            _util.ValueLabel($"{fogPct}%", p.x + p.width - 12f, y);
+
+            float fogValue = Mathf.InverseLerp(fogMin, fogMax, fogMult);
+            float? newFogValue = _util.Slider("Fog", fogValue, center, y, ref _mouseYLock);
+            if (newFogValue.HasValue)
+            {
+                float newMult = Mathf.Lerp(fogMin, fogMax, newFogValue.Value);
+                newMult = Mathf.Round(newMult * 100f) / 100f;
+                if (Mathf.Abs(newMult - fogMult) > 0.001f)
+                {
+                    Plugin.SaveFogMultiplier(newMult);
                 }
             }
 

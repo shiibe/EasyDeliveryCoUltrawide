@@ -13,6 +13,7 @@ namespace EasyDeliveryCoUltrawide
         private const string PrefKeyFovLegacy = "UltrawideFovOverride";
         internal const string PrefKeyFovThirdPerson = "UltrawideFovOverride_ThirdPerson";
         internal const string PrefKeyFovFirstPerson = "UltrawideFovOverride_FirstPerson";
+        internal const string PrefKeyFogMultiplier = "UltrawideFogMultiplier";
         internal const string PrefKeyPixelationMode = "UltrawidePixelationMode";
         private const string PrefKeyPixelationModeVersion = "UltrawidePixelationModeVersion";
         internal const string PrefKeyViewDistanceMode = "UltrawideViewDistanceMode";
@@ -44,6 +45,7 @@ namespace EasyDeliveryCoUltrawide
 
         private static int _pixelationMode = -1;
         private static int _viewDistanceMode = -1;
+        private static float _fogMultiplier = -1f;
 
         private static bool _insideLookupInit;
         private static Type _ambianceType;
@@ -115,6 +117,27 @@ namespace EasyDeliveryCoUltrawide
 
             GetViewDistanceMode();
             RefreshViewDistance();
+
+            GetFogMultiplier();
+        }
+
+        internal static float GetFogMultiplier()
+        {
+            if (_fogMultiplier >= 0f)
+            {
+                return _fogMultiplier;
+            }
+
+            float raw = PlayerPrefs.GetFloat(PrefKeyFogMultiplier, 1f);
+            _fogMultiplier = Mathf.Clamp(raw, 0.1f, 5f);
+            return _fogMultiplier;
+        }
+
+        internal static void SaveFogMultiplier(float multiplier)
+        {
+            multiplier = Mathf.Clamp(multiplier, 0.1f, 5f);
+            _fogMultiplier = multiplier;
+            PlayerPrefs.SetFloat(PrefKeyFogMultiplier, multiplier);
         }
 
         internal static int GetViewDistanceMode()
