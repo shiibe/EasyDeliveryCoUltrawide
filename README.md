@@ -1,3 +1,10 @@
+## Deprecated
+This package is deprecated and will not receive new updates.
+
+Use the rewrite/rebrand instead:
+- SebUltrawide on Thunderstore: https://thunderstore.io/c/easy-delivery-co/p/shiibe/SebUltrawide/
+- SebUltrawide source: https://github.com/shiibe/EasyDeliveryCoMods/tree/master/plugins/SebUltrawide
+
 <h1>
 <p align="center">
   <img src="https://raw.githubusercontent.com/shiibe/EasyDeliveryCoUltrawide/refs/heads/main/assets/icon.png" alt="Logo" width="128">

@@ -1,3 +1,6 @@
+## 1.2.1
+- Deprecated; use SebUltrawide: https://thunderstore.io/c/easy-delivery-co/p/shiibe/SebUltrawide/
+
 ## 1.2.0
 - Add `default` aspect mode to disable ultrawide fixes (vanilla presentation) while keeping pixelation usable.
 - Improve `aspect_ratio=auto` to use the current window aspect ratio (rounded) to avoid CRT edge smearing.
